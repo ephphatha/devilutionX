@@ -916,6 +916,93 @@ void DrawDungeon(const Surface &out, Point tilePosition, Point targetBufferPosit
 	}
 }
 
+bool randomize = true;
+#define PATTERNWIDTH 3
+#define PATTERNHEIGHT 5
+int patternRandomizer[MAXDUNX][MAXDUNY];
+
+Point FillPattern(Point tilePosition)
+{
+	Point patterns[] = { { 51, 24 }, { 58, 40 }, { 12, 31 }, { 76, 44 }, { 15, 56 }, { 57, 20 }, { 93, 10 } };
+	if (randomize) {
+		randomize = false;
+		for (int x = 0; x < MAXDUNX; x++) {
+			for (int y = 0; y < MAXDUNY; y++) {
+				size_t numPatterns = sizeof(patterns) / sizeof(Point);
+				patternRandomizer[x][y] = rand() % numPatterns;
+			}
+		}
+	}
+	int indexX = abs(tilePosition.x) / PATTERNWIDTH;
+	int indexY = abs(tilePosition.y) / PATTERNHEIGHT;
+	int pattern = 0;
+	if (indexX < MAXDUNX && indexY < MAXDUNY)
+		pattern = patternRandomizer[indexX][indexY];
+	Point base = patterns[pattern];
+	Point pos = { base.x + abs(tilePosition.x % PATTERNWIDTH), base.y + abs(tilePosition.y % PATTERNHEIGHT) };
+	return pos;
+}
+
+/**
+ * @brief Render some semi random patterns beyond town borders instead of black void
+ */
+
+void RenderTownBorders(const Surface &out, Point tilePosition, Point targetBufferPosition)
+{
+	if (leveltype != DTYPE_TOWN)
+		return;
+
+	Point pos = { 0, 0 };
+
+	// top side
+	if (tilePosition.y < 0) {
+		//sand patch
+		if (tilePosition.y == -1 && tilePosition.x >= 53 && tilePosition.x <= 60) {
+			pos = { 61, 66 };
+		} else if (tilePosition == Point { 61, -1 })
+			pos = { 64, 66 };
+		else if (tilePosition == Point { 52, -1 })
+			pos = { 57, 66 };
+
+		//rivers
+		else if (IsAnyOf(tilePosition.x, 2, 62, 82))
+			pos = { 68, 22 - abs(tilePosition.y % 3) };
+		else if (IsAnyOf(tilePosition.x, 3, 63, 83))
+			pos = { 69, 22 - abs(tilePosition.y % 3) };
+		else
+			pos = FillPattern(tilePosition);
+	}
+
+	//bottom side
+	else if (tilePosition.y > 95) {
+		//sand patch
+		if (tilePosition.y == -1 && tilePosition.x >= 53 && tilePosition.x <= 60) {
+			pos = { 61, 66 };
+		} else if (tilePosition == Point { 61, -1 })
+			pos = { 64, 66 };
+		else if (tilePosition == Point { 52, -1 })
+			pos = { 57, 66 };
+
+		//rivers
+		else if (IsAnyOf(tilePosition.x, 32, 84))
+			pos = { 68, 22 - abs(tilePosition.y % 3) };
+		else if (IsAnyOf(tilePosition.x, 33, 85))
+			pos = { 69, 22 - abs(tilePosition.y % 3) };
+		else
+			pos = FillPattern(tilePosition);
+	}
+
+	//left side
+	else if (tilePosition.x < 0)
+		pos = FillPattern(tilePosition);
+
+	//right side
+	else if (tilePosition.x > 95)
+		pos = FillPattern(tilePosition);
+
+	DrawFloor(out, pos, targetBufferPosition);
+}
+
 /**
  * @brief Render a row of tiles
  * @param out Buffer to render to
@@ -935,9 +1022,11 @@ void DrawFloor(const Surface &out, Point tilePosition, Point targetBufferPositio
 						DrawFloor(out, tilePosition, targetBufferPosition);
 				} else {
 					world_draw_black_tile(out, targetBufferPosition.x, targetBufferPosition.y);
+					RenderTownBorders(out, tilePosition, targetBufferPosition);
 				}
 			} else {
 				world_draw_black_tile(out, targetBufferPosition.x, targetBufferPosition.y);
+				RenderTownBorders(out, tilePosition, targetBufferPosition);
 			}
 			tilePosition += Direction::East;
 			targetBufferPosition.x += TILE_WIDTH;
