@@ -916,31 +916,36 @@ void DrawDungeon(const Surface &out, Point tilePosition, Point targetBufferPosit
 	}
 }
 
-bool randomize = true;
-#define PATTERNWIDTH 3
-#define PATTERNHEIGHT 5
-int patternRandomizer[MAXDUNX][MAXDUNY];
-
 Point FillPattern(Point tilePosition)
 {
-	Point patterns[] = { { 51, 24 }, { 58, 40 }, { 12, 31 }, { 76, 44 }, { 15, 56 }, { 57, 20 }, { 93, 10 } };
-	if (randomize) {
-		randomize = false;
+	constexpr int PATTERNWIDTH = 3;
+	constexpr int PATTERNHEIGHT = 5;
+	constexpr std::array<Point, 7> patterns { { { 51, 24 }, { 58, 40 }, { 12, 31 }, { 76, 44 }, { 15, 56 }, { 57, 20 }, { 93, 10 } } };
+
+	static int patternRandomizer[MAXDUNX][MAXDUNY] {};
+	static bool doInit = true;
+
+	if (doInit) {
+		doInit = false;
+
 		for (int x = 0; x < MAXDUNX; x++) {
 			for (int y = 0; y < MAXDUNY; y++) {
-				size_t numPatterns = sizeof(patterns) / sizeof(Point);
-				patternRandomizer[x][y] = rand() % numPatterns;
+				patternRandomizer[x][y] = rand() % patterns.size();
 			}
 		}
 	}
-	int indexX = abs(tilePosition.x) / PATTERNWIDTH;
-	int indexY = abs(tilePosition.y) / PATTERNHEIGHT;
+
+	Point patternBaseTile = abs(tilePosition);
+	Displacement patternOffset { patternBaseTile.x % PATTERNWIDTH, patternBaseTile.y % PATTERNHEIGHT };
+
+	patternBaseTile.x /= PATTERNWIDTH;
+	patternBaseTile.y /= PATTERNHEIGHT;
 	int pattern = 0;
-	if (indexX < MAXDUNX && indexY < MAXDUNY)
-		pattern = patternRandomizer[indexX][indexY];
+	if (InDungeonBounds(patternBaseTile)) {
+		pattern = patternRandomizer[patternBaseTile.x][patternBaseTile.y];
+	}
 	Point base = patterns[pattern];
-	Point pos = { base.x + abs(tilePosition.x % PATTERNWIDTH), base.y + abs(tilePosition.y % PATTERNHEIGHT) };
-	return pos;
+	return base + patternOffset;
 }
 
 /**
@@ -954,51 +959,29 @@ void RenderTownBorders(const Surface &out, Point tilePosition, Point targetBuffe
 
 	Point pos = { 0, 0 };
 
-	// top side
-	if (tilePosition.y < 0) {
-		//sand patch
-		if (tilePosition.y == -1 && tilePosition.x >= 53 && tilePosition.x <= 60) {
-			pos = { 61, 66 };
-		} else if (tilePosition == Point { 61, -1 })
+	if (tilePosition.y == -1 && tilePosition.x >= 52 && tilePosition.x <= 61) {
+		// top side sand patch
+		if (tilePosition.x == 61) {
+			// right corner
 			pos = { 64, 66 };
-		else if (tilePosition == Point { 52, -1 })
+		} else if (tilePosition.x == 52) {
+			// left corner
 			pos = { 57, 66 };
-
-		//rivers
-		else if (IsAnyOf(tilePosition.x, 2, 62, 82))
-			pos = { 68, 22 - abs(tilePosition.y % 3) };
-		else if (IsAnyOf(tilePosition.x, 3, 63, 83))
-			pos = { 69, 22 - abs(tilePosition.y % 3) };
-		else
-			pos = FillPattern(tilePosition);
-	}
-
-	//bottom side
-	else if (tilePosition.y > 95) {
-		//sand patch
-		if (tilePosition.y == -1 && tilePosition.x >= 53 && tilePosition.x <= 60) {
+		} else {
+			// edge
 			pos = { 61, 66 };
-		} else if (tilePosition == Point { 61, -1 })
-			pos = { 64, 66 };
-		else if (tilePosition == Point { 52, -1 })
-			pos = { 57, 66 };
-
-		//rivers
-		else if (IsAnyOf(tilePosition.x, 32, 84))
-			pos = { 68, 22 - abs(tilePosition.y % 3) };
-		else if (IsAnyOf(tilePosition.x, 33, 85))
-			pos = { 69, 22 - abs(tilePosition.y % 3) };
-		else
-			pos = FillPattern(tilePosition);
+		}
+	} else if ((tilePosition.y < 0 && IsAnyOf(tilePosition.x, 2, 62, 82))
+	    || (tilePosition.y > 95 && IsAnyOf(tilePosition.x, 32, 84))) {
+		// left river bank
+		pos = { 68, 22 - abs(tilePosition.y % 3) };
+	} else if ((tilePosition.y < 0 && IsAnyOf(tilePosition.x, 3, 63, 83))
+	    || (tilePosition.y > 95 && IsAnyOf(tilePosition.x, 33, 85))) {
+		// right river bank
+		pos = { 69, 22 - abs(tilePosition.y % 3) };
+	} else {
+		pos = FillPattern(tilePosition);
 	}
-
-	//left side
-	else if (tilePosition.x < 0)
-		pos = FillPattern(tilePosition);
-
-	//right side
-	else if (tilePosition.x > 95)
-		pos = FillPattern(tilePosition);
 
 	DrawFloor(out, pos, targetBufferPosition);
 }
