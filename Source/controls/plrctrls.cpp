@@ -1482,12 +1482,8 @@ bool TryDropItem()
 		}
 	}
 
-	cursPosition = myPlayer.position.future + Direction::SouthEast;
-	if (!DropItemBeforeTrig()) {
-		// Try to drop on the other side
-		cursPosition = myPlayer.position.future + Direction::SouthWest;
-		DropItemBeforeTrig();
-	}
+	cursPosition = myPlayer.position.future;
+	DropItemBeforeTrig();
 
 	if (pcurs != CURSOR_HAND) {
 		myPlayer.Say(HeroSpeech::WhereWouldIPutThis);
