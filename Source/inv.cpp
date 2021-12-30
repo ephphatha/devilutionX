@@ -1123,7 +1123,7 @@ std::optional<Point> FindClosestValidItemPosition(Point startingPosition)
 	while (!tilesToCheck.empty()) {
 		Point currentPosition = tilesToCheck.front();
 		tilesToCheck.pop();
-		for (auto dir : PathDirs) {
+		for (auto dir : { Direction::NorthEast, Direction::NorthWest, Direction::SouthEast, Direction::SouthWest }) {
 			Point newPosition = currentPosition + dir;
 			if (InDungeonBounds(newPosition)) {
 				if (!checkedTiles[newPosition.x][newPosition.y]) {
