@@ -329,7 +329,7 @@ void LeftMouseDown(int wParam)
 			} else if (sbookflag && GetRightPanel().Contains(MousePosition)) {
 				CheckSBook();
 			} else if (pcurs >= CURSOR_FIRSTITEM) {
-				if (TryInvPut()) {
+				if (GetDropItemPosition(Players[MyPlayerId], cursPosition)) {
 					NetSendCmdPItem(true, CMD_PUTITEM, cursPosition);
 					NewCursor(CURSOR_HAND);
 				}

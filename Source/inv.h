@@ -11,6 +11,7 @@
 #include "items.h"
 #include "palette.h"
 #include "player.h"
+#include "utils/stdcompat/optional.hpp"
 
 namespace devilution {
 
@@ -172,7 +173,7 @@ void AutoGetItem(int pnum, Item *item, int ii);
 int FindGetItem(int32_t iseed, _item_indexes idx, uint16_t ci);
 void SyncGetItem(Point position, int32_t iseed, _item_indexes idx, uint16_t ci);
 bool CanPut(Point position);
-bool TryInvPut();
+std::optional<Point> GetDropItemPosition(const Player &player, Point position);
 int InvPutItem(Player &player, Point position);
 int SyncPutItem(Player &player, Point position, int idx, uint16_t icreateinfo, int iseed, int Id, int dur, int mdur, int ch, int mch, int ivalue, uint32_t ibuff, int toHit, int maxDam, int minStr, int minMag, int minDex, int ac);
 int8_t CheckInvHLight();

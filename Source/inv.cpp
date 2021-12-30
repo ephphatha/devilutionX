@@ -1140,28 +1140,6 @@ std::optional<Point> FindClosestValidItemPosition(Point startingPosition)
 	return {};
 }
 
-bool PutItem(Player &player, Point &position)
-{
-	if (ActiveItemCount >= MAXITEMS)
-		return false;
-
-	Direction d = GetDirection(player.position.tile, position);
-
-	if (position.WalkingDistance(player.position.tile) > 1) {
-		position = player.position.tile + d;
-	}
-
-	std::optional<Point> itemPosition = FindClosestValidItemPosition(position);
-
-	if (itemPosition) {
-		position = *itemPosition;
-		return true;
-	}
-
-	return false;
-
-}
-
 bool CanUseStaff(Item &staff, spell_id spell)
 {
 	return !staff.isEmpty()
@@ -1818,19 +1796,17 @@ bool CanPut(Point position)
 	return true;
 }
 
-bool TryInvPut()
+std::optional<Point> GetDropItemPosition(const Player &player, Point targetPosition)
 {
 	if (ActiveItemCount >= MAXITEMS)
-		return false;
+		return {};
 
-	auto &myPlayer = Players[MyPlayerId];
-	Direction dir = GetDirection(myPlayer.position.tile, cursPosition);
-	std::optional<Point> itemPosition = FindClosestValidItemPosition(myPlayer.position.tile + dir);
-
-	if (itemPosition) {
-		return true;
+	if (targetPosition.WalkingDistance(player.position.tile) > 1) {
+		Direction dir = GetDirection(player.position.tile, targetPosition);
+		targetPosition = player.position.tile + dir;
 	}
-	return false;
+
+	return FindClosestValidItemPosition(targetPosition);
 }
 
 int InvPutItem(Player &player, Point position)
@@ -1846,19 +1822,20 @@ int InvPutItem(Player &player, Point position)
 		}
 	}
 
-	if (!PutItem(player, position))
+	std::optional<Point> dropPosition = GetDropItemPosition(player, position);
+	if (!dropPosition)
 		return -1;
 
-	assert(CanPut(position));
+	assert(CanPut(*dropPosition));
 
 	int ii = AllocateItem();
 
-	dItem[position.x][position.y] = ii + 1;
+	dItem[dropPosition->x][dropPosition->y] = ii + 1;
 	Items[ii] = player.HoldItem;
-	Items[ii].position = position;
+	Items[ii].position = *dropPosition;
 	RespawnItem(&Items[ii], true);
 
-	if (currlevel == 21 && position == CornerStone.position) {
+	if (currlevel == 21 && *dropPosition == CornerStone.position) {
 		CornerStone.item = Items[ii];
 		InitQTextMsg(TEXT_CORNSTN);
 		Quests[Q_CORNSTN]._qlog = false;
@@ -1878,15 +1855,16 @@ int SyncPutItem(Player &player, Point position, int idx, uint16_t icreateinfo, i
 			return -1;
 	}
 
-	if (!PutItem(player, position))
+	std::optional<Point> dropPosition = GetDropItemPosition(player, position);
+	if (!dropPosition)
 		return -1;
 
-	assert(CanPut(position));
+	assert(CanPut(*dropPosition));
 
 	int ii = AllocateItem();
 	auto &item = Items[ii];
 
-	dItem[position.x][position.y] = ii + 1;
+	dItem[dropPosition->x][dropPosition->y] = ii + 1;
 
 	if (idx == IDI_EAR) {
 		RecreateEar(item, icreateinfo, iseed, id, dur, mdur, ch, mch, ivalue, ibuff);
@@ -1907,10 +1885,10 @@ int SyncPutItem(Player &player, Point position, int idx, uint16_t icreateinfo, i
 		item.dwBuff = ibuff;
 	}
 
-	item.position = position;
+	item.position = *dropPosition;
 	RespawnItem(&Items[ii], true);
 
-	if (currlevel == 21 && position == CornerStone.position) {
+	if (currlevel == 21 && *dropPosition == CornerStone.position) {
 		CornerStone.item = Items[ii];
 		InitQTextMsg(TEXT_CORNSTN);
 		Quests[Q_CORNSTN]._qlog = false;
@@ -2220,7 +2198,7 @@ int CalculateGold(Player &player)
 
 bool DropItemBeforeTrig()
 {
-	if (!TryInvPut()) {
+	if (!GetDropItemPosition(Players[MyPlayerId], cursPosition)) {
 		return false;
 	}
 
