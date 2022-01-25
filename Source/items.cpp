@@ -3464,7 +3464,7 @@ void CornerstoneLoad(Point position)
 	CornerStone.activated = true;
 	if (dItem[position.x][position.y] != 0) {
 		int ii = dItem[position.x][position.y] - 1;
-		for (int i = 0; i < ActiveItemCount; i++) {
+		for (size_t i = 0; i < ActiveItemCount; i++) {
 			if (ActiveItems[i] == ii) {
 				DeleteItem(i);
 				break;
@@ -3589,12 +3589,12 @@ void RespawnItem(Item *item, bool flipFlag)
 		item->_iSelFlag = 1;
 }
 
-void DeleteItem(int i)
+void DeleteItem(size_t i)
 {
 	if (ActiveItemCount > 0)
 		ActiveItemCount--;
 
-	assert(i >= 0 && i < MAXITEMS && ActiveItemCount < MAXITEMS);
+	assert(i < MAXITEMS && ActiveItemCount < MAXITEMS);
 
 	if (pcursitem == ActiveItems[i]) // Unselect item if player has it highlighted
 		pcursitem = -1;

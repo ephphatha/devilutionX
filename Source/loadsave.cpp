@@ -924,7 +924,7 @@ void LoadDroppedItems(LoadHelper &file, size_t savedItemCount)
 
 void RemoveEmptyLevelItems()
 {
-	for (int i = ActiveItemCount; i > 0; i--) {
+	for (size_t i = ActiveItemCount; i > 0; i--) {
 		auto &item = Items[ActiveItems[i]];
 		if (item.isEmpty()) {
 			dItem[item.position.x][item.position.y] = 0;

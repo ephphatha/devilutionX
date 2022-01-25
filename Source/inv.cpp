@@ -1096,7 +1096,7 @@ void CleanupItems(int ii)
 		CornerStone.item._iPostDraw = false;
 	}
 
-	int i = 0;
+	size_t i = 0;
 	while (i < ActiveItemCount) {
 		if (ActiveItems[i] == ii) {
 			DeleteItem(i);
