@@ -772,15 +772,20 @@ void LoadDiabMonsts()
 	}
 }
 
-void DeleteMonster(int i)
+void DeleteMonster(size_t i)
 {
-	const auto &monster = Monsters[ActiveMonsters[i]];
-	if ((monster._mFlags & MFLAG_BERSERK) != 0) {
-		AddUnLight(monster.mlid);
-	}
+	if (ActiveMonsterCount > 0)
+		ActiveMonsterCount--;
 
-	ActiveMonsterCount--;
-	std::swap(ActiveMonsters[i], ActiveMonsters[ActiveMonsterCount]); // This ensures alive monsters are before ActiveMonsterCount in the array and any deleted monster after
+	assert(i < MAXMONSTERS && ActiveMonsterCount < MAXMONSTERS);
+
+	if (pcursmonst == ActiveMonsters[i]) // Unselect monster if player highlighted it
+		pcursmonst = -1;
+
+	if (i < ActiveMonsterCount) {
+		// This ensures alive monsters are before ActiveMonsterCount in the array and any deleted monster after
+		std::swap(ActiveMonsters[i], ActiveMonsters[ActiveMonsterCount]);
+	}
 }
 
 void NewMonsterAnim(Monster &monster, MonsterGraphic graphic, Direction md, AnimationDistributionFlags flags = AnimationDistributionFlags::None, int numSkippedFrames = 0, int distributeFramesBeforeFrame = 0)
@@ -4244,7 +4249,7 @@ void GolumAi(int i)
 
 void DeleteMonsterList()
 {
-	for (int i = 0; i < MAX_PLRS; i++) {
+	for (size_t i = 0; i < MAX_PLRS; i++) {
 		auto &golem = Monsters[i];
 		if (!golem._mDelFlag)
 			continue;
@@ -4255,10 +4260,13 @@ void DeleteMonsterList()
 		golem._mDelFlag = false;
 	}
 
-	for (int i = MAX_PLRS; i < ActiveMonsterCount;) {
-		if (Monsters[ActiveMonsters[i]]._mDelFlag) {
-			if (pcursmonst == ActiveMonsters[i]) // Unselect monster if player highlighted it
-				pcursmonst = -1;
+	for (size_t i = MAX_PLRS; i < ActiveMonsterCount;) {
+		const auto &monster = Monsters[ActiveMonsters[i]];
+		if (monster._mDelFlag) {
+			if ((monster._mFlags & MFLAG_BERSERK) != 0) {
+				AddUnLight(monster.mlid);
+			}
+
 			DeleteMonster(i);
 		} else {
 			i++;
