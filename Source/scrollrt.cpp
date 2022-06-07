@@ -116,28 +116,27 @@ bool CouldMissileCollide(Point tile, bool checkPlayerAndMonster)
 
 void UpdateMissileRendererData(Missile &m)
 {
-	m.position.tileForRendering = m.position.tile;
-	m.position.offsetForRendering = m.position.offset;
-
 	const MissileMovementDistrubution missileMovement = MissilesData[m._mitype].MovementDistribution;
 	// don't calculate missile position if they don't move
-	if (missileMovement == MissileMovementDistrubution::Disabled || m.position.velocity == Displacement {})
+	if (missileMovement == MissileMovementDistrubution::Disabled || m.position.velocity == Displacement {}) {
+		m.position.tileForRendering = m.position.tile;
+		m.position.offsetForRendering = m.position.offset.screenToSubtile();
 		return;
+	}
 
 	float fProgress = gfProgressToNextGameTick;
 	Displacement velocity = m.position.velocity * fProgress;
 	Displacement traveled = m.position.traveled + velocity;
 
-	int mx = traveled.deltaX >> 16;
-	int my = traveled.deltaY >> 16;
-	int dx = (mx + 2 * my) / 64;
-	int dy = (2 * my - mx) / 64;
+	Displacement unitsTravelled = traveled.screenToWorld() >> 10;
+	Displacement tilesTravelled = unitsTravelled >> 6;
 
-	// calculcate the future missile position
-	m.position.tileForRendering = m.position.start + Displacement { dx, dy };
-	m.position.offsetForRendering = { mx + (dy * 32) - (dx * 32), my - (dx * 16) - (dy * 16) };
+	// diablo missile velocities/total displacements are backwards so we subtract instead of add here
+	m.position.tileForRendering = m.position.start - tilesTravelled;
+	// This next line is actually intended to be subtraction, we want the leftovers here.
+	m.position.offsetForRendering = unitsTravelled - (tilesTravelled << 6);
 
-	// In some cases this calculcated position is invalid.
+	// In some cases this calculated position is invalid.
 	// For example a missile shouldn't move inside a wall.
 	// In this case the game logic don't advance the missile position and removes the missile or shows an explosion animation at the old position.
 	// For the animation distribution logic this means we are not allowed to move to a tile where the missile could collide, cause this could be a invalid position.
@@ -156,22 +155,18 @@ void UpdateMissileRendererData(Missile &m)
 	while (m.position.tile != m.position.tileForRendering) {
 		fProgress -= 0.01F;
 
-		if (fProgress <= 0.0F) {
-			m.position.tileForRendering = m.position.tile;
-			m.position.offsetForRendering = m.position.offset;
-			return;
-		}
-
 		velocity = m.position.velocity * fProgress;
 		traveled = m.position.traveled + velocity;
 
-		mx = traveled.deltaX >> 16;
-		my = traveled.deltaY >> 16;
-		dx = (mx + 2 * my) / 64;
-		dy = (2 * my - mx) / 64;
+		unitsTravelled = traveled.screenToWorld() >> 10;
+		tilesTravelled = unitsTravelled >> 6;
 
-		m.position.tileForRendering = m.position.start + Displacement { dx, dy };
-		m.position.offsetForRendering = { mx + (dy * 32) - (dx * 32), my - (dx * 16) - (dy * 16) };
+		m.position.tileForRendering = m.position.start - tilesTravelled;
+		m.position.offsetForRendering = unitsTravelled - (tilesTravelled << 6);
+
+		if (fProgress <= 0.0F) {
+			return;
+		}
 	}
 }
 
@@ -324,7 +319,7 @@ void DrawMissilePrivate(const Surface &out, const Missile &missile, Point target
 		return;
 	}
 
-	const Point missileRenderPosition { targetBufferPosition + missile.position.offsetForRendering - Displacement { missile._miAnimWidth2, 0 } };
+	const Point missileRenderPosition { targetBufferPosition + missile.position.getRenderOffset() - Displacement { missile._miAnimWidth2, 0 } };
 	CelSprite cel { missile._miAnimData, missile._miAnimWidth };
 	if (missile._miUniqTrans != 0)
 		Cl2DrawTRN(out, missileRenderPosition.x, missileRenderPosition.y, cel, nCel, Monsters[missile._misource].uniqueTRN.get());

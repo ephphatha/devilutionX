@@ -59,4 +59,20 @@ TEST(MathTest, MissileTransformation)
 	EXPECT_EQ(Displacement(8, 0).worldToNormalScreen(), Displacement(-46340, -23170)); // ~(0.7, 0.7/2)
 }
 
+TEST(MathTest, SubtileTransformation)
+{
+	EXPECT_EQ(Displacement(35, -21).subtileToScreen(), Displacement(-28, -3));
+
+	EXPECT_EQ(Displacement(64, 0).subtileToScreen(), Displacement(-32, -16)) << "SE Displacement doesn't match expected screen transform";
+	EXPECT_EQ(Displacement(64, 64).subtileToScreen(), Displacement(0, -32)) << "S Displacement doesn't match expected screen transform";
+	EXPECT_EQ(Displacement(0, 64).subtileToScreen(), Displacement(32, -16)) << "SW Displacement doesn't match expected screen transform";
+	EXPECT_EQ(Displacement(-64, 64).subtileToScreen(), Displacement(64, 0)) << "W Displacement doesn't match expected screen transform";
+	EXPECT_EQ(Displacement(-64, 0).subtileToScreen(), Displacement(32, 16)) << "NW Displacement doesn't match expected screen transform";
+	EXPECT_EQ(Displacement(-64, -64).subtileToScreen(), Displacement(0, 32)) << "N Displacement doesn't match expected screen transform";
+	EXPECT_EQ(Displacement(0, -64).subtileToScreen(), Displacement(-32, 16)) << "NE Displacement doesn't match expected screen transform";
+	EXPECT_EQ(Displacement(64, -64).subtileToScreen(), Displacement(-64, 0)) << "E Displacement doesn't match expected screen transform";
+
+	EXPECT_EQ(Displacement(11, -11).screenToSubtile().subtileToScreen(), Displacement(11, -11)) << "non-truncating transformations should be reversable";
+}
+
 } // namespace devilution

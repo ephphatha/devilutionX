@@ -190,6 +190,25 @@ struct Displacement {
 		return -screenToWorld();
 	}
 
+	/**
+	 * @brief Converts from a subtile offset to screen space
+	 *
+	 * To support sprites which move between tiles such as missiles this helper converts from a ([-64, 64], [-64, 64])
+	 * displacement to the typical isometric displacement for a 32 pixel tile.
+	 */
+	constexpr Displacement subtileToScreen() const
+	{
+		return { (deltaY - deltaX) / 2, (deltaY + deltaX) / -4 };
+	}
+
+	/**
+	 * This shouldn't be necessary, don't use this function. Provided only as a bandaid while fixing missile movement logic.
+	 */
+	constexpr Displacement screenToSubtile() const
+	{
+		return { -(2 * deltaY + deltaX), -(2 * deltaY - deltaX) };
+	}
+
 	constexpr Displacement screenToLight() const
 	{
 		return { (2 * deltaY + deltaX) / 8, (2 * deltaY - deltaX) / 8 };

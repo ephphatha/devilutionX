@@ -39,6 +39,11 @@ struct MissilePosition {
 	 */
 	Displacement offsetForRendering;
 
+	constexpr Displacement getRenderOffset() const
+	{
+		return offsetForRendering.subtileToScreen();
+	}
+
 	/**
 	 * @brief Stops the missile (set velocity to zero and set offset to last renderer location; shouldn't matter cause the missile don't move anymore)
 	 */
@@ -46,7 +51,7 @@ struct MissilePosition {
 	{
 		velocity = {};
 		if (tileForRendering == tile)
-			offset = offsetForRendering;
+			offset = getRenderOffset();
 	}
 };
 
