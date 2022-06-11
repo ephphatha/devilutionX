@@ -641,58 +641,90 @@ void ApplyShadowsPatterns()
 	}
 }
 
+bool MinisetMatches(const BYTE *miniset, Point localOrigin)
+{
+	int sw = miniset[0];
+	int sh = miniset[1];
+	int ii = 2;
+
+	for (int yy = 0; yy < sh; yy++) {
+		for (int xx = 0; xx < sw; xx++) {
+			if (Protected[localOrigin.x + xx][localOrigin.y + yy])
+				return false;
+			if (miniset[ii] != 0 && dungeon[localOrigin.x + xx][localOrigin.y + yy] != miniset[ii])
+				return false;
+			ii++;
+		}
+	}
+	return true;
+}
+constexpr int RoundEven(int arg)
+{
+	return arg + (arg % 2);
+}
+
+/* Replicate bugged minimum bounds calculation from original level generation */
+Point ApplyDrlgL1MinBound(Point tile, Point min, int maxX)
+{
+	if (tile.x < min.x) {
+		int xInc = RoundEven(min.x - tile.x) / 2;
+		tile.x += xInc * 2;
+
+		if (tile.y < min.y) {
+			tile.y = std::min(tile.y + xInc, min.y);
+		}
+	}
+
+	if (tile.y < min.y) {
+		tile.x = std::max((tile.x + min.y - tile.y) % maxX, RoundEven(min.y));
+		tile.y = min.y;
+	}
+
+	return tile;
+}
+
 bool PlaceMiniSet(const BYTE *miniset, bool setview)
 {
 	int sw = miniset[0];
 	int sh = miniset[1];
-	int sx = GenerateRnd(DMAXX - sw) - 1;
-	int sy = GenerateRnd(DMAXY - sh);
 
-	for (int bailcnt = 0;; bailcnt++) {
-		if (bailcnt > 4000)
-			return false;
+	const int MaxX = DMAXX - sw;
+	const int MaxY = DMAXY - sh;
 
-		sx++;
-		if (sx == DMAXX - sw) {
-			sx = 0;
-			sy++;
-			if (sy == DMAXY - sh) {
-				sy = 0;
-			}
-		}
+	// List initialization sequence point rules ensure the X value is generated before the Y value
+	Point searchPosition { GenerateRnd(MaxX), GenerateRnd(MaxY) };
 
-		if (SetPiecesRoom.Contains({ sx, sy })) {
-			continue;
-		}
+	// Limit the position of SetPieces for compatibility with Diablo bug
+	constexpr Point MinPosition { 13, 13 };
+	searchPosition = ApplyDrlgL1MinBound(searchPosition, MinPosition, MaxX);
 
-		// Limit the position of SetPieces for compatibility with Diablo bug
-		bool valid = true;
-		if (sx <= 12) {
-			sx++;
-			valid = false;
-		}
-		if (sy <= 12) {
-			sy++;
-			valid = false;
-		}
-		if (!valid) {
-			continue;
-		}
+	Point origin = searchPosition;
 
-		int ii = 2;
-
-		bool success = true;
-		for (int yy = 0; yy < sh && success; yy++) {
-			for (int xx = 0; xx < sw && success; xx++) {
-				if (miniset[ii] != 0 && dungeon[xx + sx][sy + yy] != miniset[ii])
-					success = false;
-				if (Protected[xx + sx][sy + yy])
-					success = false;
-				ii++;
-			}
-		}
-		if (success)
+	bool matchFound = false;
+	do {
+		if (!SetPiecesRoom.Contains(searchPosition) && MinisetMatches(miniset, searchPosition)) {
+			matchFound = true;
 			break;
+		}
+
+		searchPosition.x++;
+		if (searchPosition.x >= MaxX) {
+			searchPosition.x = 0;
+			searchPosition.y++;
+			if (searchPosition.y >= MaxY) {
+				searchPosition.y = 0;
+			}
+			searchPosition = ApplyDrlgL1MinBound(searchPosition, MinPosition, MaxX);
+			if (origin.y == searchPosition.y && origin.x < searchPosition.x) {
+				// overflow takes us past the origin point, break now. All candidate spaces have been checked
+				// according to vanilla logic so we will never match.
+				break;
+			}
+		}
+	} while (searchPosition != origin);
+
+	if (!matchFound) {
+		return false;
 	}
 
 	int ii = sw * sh + 2;
@@ -700,7 +732,7 @@ bool PlaceMiniSet(const BYTE *miniset, bool setview)
 	for (int yy = 0; yy < sh; yy++) {
 		for (int xx = 0; xx < sw; xx++) {
 			if (miniset[ii] != 0) {
-				dungeon[xx + sx][sy + yy] = miniset[ii];
+				dungeon[xx + searchPosition.x][searchPosition.y + yy] = miniset[ii];
 			}
 			ii++;
 		}
@@ -709,14 +741,14 @@ bool PlaceMiniSet(const BYTE *miniset, bool setview)
 	if (miniset == PWATERIN) {
 		int8_t t = TransVal;
 		TransVal = 0;
-		DRLG_MRectTrans(sx, sy + 2, sx + 5, sy + 4);
+		DRLG_MRectTrans(searchPosition.x, searchPosition.y + 2, searchPosition.x + 5, searchPosition.y + 4);
 		TransVal = t;
 
-		Quests[Q_PWATER].position = { 2 * sx + 21, 2 * sy + 22 };
+		Quests[Q_PWATER].position = { 2 * searchPosition.x + 21, 2 * searchPosition.y + 22 };
 	}
 
 	if (setview) {
-		ViewPosition = Point { 19, 20 } + Displacement { sx, sy } * 2;
+		ViewPosition = Point { 19, 20 } + Displacement { searchPosition } * 2;
 	}
 
 	return true;

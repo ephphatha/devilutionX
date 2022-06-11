@@ -67,6 +67,11 @@ struct Point {
 		return *this;
 	}
 
+	explicit operator Displacement()
+	{
+		return Displacement { x, y };
+	}
+
 	constexpr friend Point operator+(Point a, Displacement displacement)
 	{
 		a += displacement;
