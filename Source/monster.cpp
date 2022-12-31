@@ -1143,11 +1143,11 @@ void MonsterAttackPlayer(Monster &monster, Player &player, int hit, int minDam, 
 	if (monster.position.tile.WalkingDistance(player.position.tile) >= 2)
 		return;
 
-	int hper = GenerateRnd(100);
 #ifdef _DEBUG
 	if (DebugGodMode)
-		hper = 1000;
+		return;
 #endif
+
 	int ac = player.GetArmor();
 	if (HasAnyOf(player.pDamAcFlags, ItemSpecialEffectHf::ACAgainstDemons) && monster.data().monsterClass == MonsterClass::Demon)
 		ac += 40;
@@ -1158,20 +1158,23 @@ void MonsterAttackPlayer(Monster &monster, Player &player, int hit, int minDam, 
 	    - ac;
 	int minhit = GetMinHit();
 	hit = std::max(hit, minhit);
+	int hper = RandomIntLessThan(100);
+	if (hper >= hit)
+		return;
+
+	int dam = RandomIntBetween(minDam << 6, maxDam << 6);
+	dam = std::max(dam + (player._pIGetHit << 6), 64);
+
 	int blkper = 100;
 	if ((player._pmode == PM_STAND || player._pmode == PM_ATTACK) && player._pBlockFlag) {
-		blkper = GenerateRnd(100);
+		blkper = RandomIntLessThan(100);
 	}
 	int blk = player.GetBlockChance() - (monster.level(sgGameInitInfo.nDifficulty) * 2);
 	blk = clamp(blk, 0, 100);
-	if (hper >= hit)
-		return;
 	if (blkper < blk) {
 		Direction dir = GetDirection(player.position.tile, monster.position.tile);
 		StartPlrBlock(player, dir);
 		if (&player == MyPlayer && player.wReflections > 0) {
-			int dam = GenerateRnd(((maxDam - minDam) << 6) + 1) + (minDam << 6);
-			dam = std::max(dam + (player._pIGetHit << 6), 64);
 			CheckReflect(monster, player, dam);
 		}
 		return;
@@ -1190,8 +1193,6 @@ void MonsterAttackPlayer(Monster &monster, Player &player, int hit, int minDam, 
 			}
 		}
 	}
-	int dam = (minDam << 6) + GenerateRnd(((maxDam - minDam) << 6) + 1);
-	dam = std::max(dam + (player._pIGetHit << 6), 64);
 	if (&player == MyPlayer) {
 		if (player.wReflections > 0) {
 			int reflectedDamage = CheckReflect(monster, player, dam);
@@ -1202,7 +1203,7 @@ void MonsterAttackPlayer(Monster &monster, Player &player, int hit, int minDam, 
 
 	// Reflect can also kill a monster, so make sure the monster is still alive
 	if (HasAnyOf(player._pIFlags, ItemSpecialEffect::Thorns) && monster.mode != MonsterMode::Death) {
-		int mdam = (GenerateRnd(3) + 1) << 6;
+		int mdam = RandomIntBetween(1, 3) << 6;
 		ApplyMonsterDamage(monster, mdam);
 		if (monster.hitPoints >> 6 <= 0)
 			M_StartKill(monster, player);
