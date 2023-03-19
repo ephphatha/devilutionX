@@ -684,9 +684,9 @@ void LoadMapObjects(const char *path, Point start, WorldTileRectangle mapRange =
 
 void AddDiabObjs()
 {
-	LoadMapObjects("levels\\l4data\\diab1.dun", DiabloQuad1.megaToWorld(), { DiabloQuad2, { 11, 12 } }, 1);
-	LoadMapObjects("levels\\l4data\\diab2a.dun", DiabloQuad2.megaToWorld(), { DiabloQuad3, { 11, 11 } }, 2);
-	LoadMapObjects("levels\\l4data\\diab3a.dun", DiabloQuad3.megaToWorld(), { DiabloQuad4, { 9, 9 } }, 3);
+	LoadMapObjects("levels\\l4data\\diab1.dun", DiabloQuad1.megaToWorld(), { DiabloQuad2, WorldTileSize { 11, 12 } }, 1);
+	LoadMapObjects("levels\\l4data\\diab2a.dun", DiabloQuad2.megaToWorld(), { DiabloQuad3, WorldTileSize { 11, 11 } }, 2);
+	LoadMapObjects("levels\\l4data\\diab3a.dun", DiabloQuad3.megaToWorld(), { DiabloQuad4, WorldTileSize { 9, 9 } }, 3);
 }
 
 void AddCryptObject(Object &object, int a2)
@@ -3907,7 +3907,7 @@ void InitObjects()
 					break;
 				}
 				Quests[Q_BLOOD]._qmsg = spId;
-				AddBookLever(OBJ_BLOODBOOK, { SetPiece.position + Displacement { 0, 3 }, { 2, 4 } }, spId);
+				AddBookLever(OBJ_BLOODBOOK, { SetPiece.position + WorldTileDisplacement { 0, 3 }, WorldTileSize { 2, 4 } }, spId);
 				AddObject(OBJ_PEDESTAL, SetPiece.position.megaToWorld() + Displacement { 9, 16 });
 			}
 			InitRndBarrels();

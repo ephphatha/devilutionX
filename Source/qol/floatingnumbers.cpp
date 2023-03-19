@@ -189,7 +189,7 @@ void DrawFloatingNumbers(const Surface &out, Point viewPosition, Displacement of
 		float mul = 1 - (timeLeft / 2500.0f);
 		screenPosition += floatingNum.endOffset * mul;
 
-		DrawString(out, floatingNum.text, Rectangle { screenPosition, { lineWidth, 0 } }, floatingNum.style);
+		DrawString(out, floatingNum.text, Rectangle { screenPosition, Size { lineWidth, 0 } }, floatingNum.style);
 	}
 
 	ClearExpiredNumbers();

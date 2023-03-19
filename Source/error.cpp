@@ -23,15 +23,14 @@ std::deque<std::string> DiabloMessages;
 std::vector<std::string> TextLines;
 uint32_t msgdelay;
 int ErrorWindowHeight = 54;
-const int LineHeight = 12;
-const int LineWidth = 418;
+const Size LineArea { 418, 12 };
 
 void InitNextLines()
 {
 	msgdelay = SDL_GetTicks();
 	TextLines.clear();
 
-	const std::string paragraphs = WordWrapString(DiabloMessages.front(), LineWidth, GameFont12, 1);
+	const std::string paragraphs = WordWrapString(DiabloMessages.front(), LineArea.width, GameFont12, 1);
 
 	size_t previous = 0;
 	while (true) {
@@ -42,7 +41,7 @@ void InitNextLines()
 		previous = next + 1;
 	}
 
-	ErrorWindowHeight = std::max(54, static_cast<int>((TextLines.size() * LineHeight) + 42));
+	ErrorWindowHeight = std::max(54, static_cast<int>((TextLines.size() * LineArea.height) + 42));
 }
 
 } // namespace
@@ -166,7 +165,7 @@ void DrawDiabloMsg(const Surface &out)
 
 	int lineNumber = 0;
 	for (auto &line : TextLines) {
-		DrawString(out, line, { { uiRectanglePosition.x + 109, dialogStartY + 12 + lineNumber * LineHeight }, { LineWidth, LineHeight } }, UiFlags::AlignCenter, 1, LineHeight);
+		DrawString(out, line, { { uiRectanglePosition.x + 109, dialogStartY + 12 + lineNumber * LineArea.height }, LineArea }, UiFlags::AlignCenter, 1, LineArea.height);
 		lineNumber += 1;
 	}
 

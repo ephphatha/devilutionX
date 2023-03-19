@@ -192,7 +192,7 @@ void DrawHelp(const Surface &out)
 	DrawSTextHelp();
 	DrawQTextBack(out);
 
-	const int lineHeight = LineHeight();
+	const Size textArea = { ContentTextWidth, LineHeight() };
 	const int blankLineHeight = BlankLineHeight();
 
 	string_view title;
@@ -206,7 +206,7 @@ void DrawHelp(const Surface &out)
 	const int sy = uiPosition.y;
 
 	DrawString(out, title,
-	    { { sx, sy + PaddingTop + blankLineHeight }, { ContentTextWidth, lineHeight } },
+	    { { sx, sy + PaddingTop + blankLineHeight }, textArea },
 	    UiFlags::ColorWhitegold | UiFlags::AlignCenter);
 
 	const int titleBottom = sy + HeaderHeight();
@@ -227,11 +227,11 @@ void DrawHelp(const Surface &out)
 			style = UiFlags::ColorBlue;
 		}
 
-		DrawString(out, line.substr(offset), { { sx, contentY + i * lineHeight }, { ContentTextWidth, lineHeight } }, style, /*spacing=*/1, lineHeight);
+		DrawString(out, line.substr(offset), { { sx, contentY + i * textArea.height }, textArea }, style, /*spacing=*/1, textArea.height);
 	}
 
 	DrawString(out, _("Press ESC to end or the arrow keys to scroll."),
-	    { { sx, contentY + ContentsTextHeight() + ContentPaddingY() + blankLineHeight }, { ContentTextWidth, lineHeight } },
+	    { { sx, contentY + ContentsTextHeight() + ContentPaddingY() + blankLineHeight }, textArea },
 	    UiFlags::ColorWhitegold | UiFlags::AlignCenter);
 
 	DrawHelpSlider(out);

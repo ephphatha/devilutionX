@@ -83,7 +83,7 @@ int FirstFinishedQuest;
 /** Currently selected quest list item */
 int SelectedQuest;
 
-constexpr Rectangle InnerPanel { { 32, 26 }, { 280, 300 } };
+constexpr Rectangle InnerPanel { { 32, 26 }, Size { 280, 300 } };
 constexpr int LineHeight = 12;
 constexpr int MaxSpacing = LineHeight * 2;
 int ListYOffset;
@@ -128,8 +128,8 @@ int QuestGroup4[2] = { Q_VEIL, Q_WARLORD };
  */
 void DrawButcher()
 {
-	Point position = SetPiece.position.megaToWorld() + Displacement { 3, 3 };
-	DRLG_RectTrans({ position, { 7, 7 } });
+	WorldTilePosition position = SetPiece.position.megaToWorld() + WorldTileDisplacement { 3, 3 };
+	DRLG_RectTrans({ position, WorldTileSize { 7, 7 } });
 }
 
 void DrawSkelKing(quest_id q, Point position)
@@ -219,7 +219,7 @@ void PrintQLString(const Surface &out, int x, int y, string_view str, bool marke
 	if (marked) {
 		ClxDraw(out, GetPanelPosition(UiPanels::Quest, { x - 20, y + 13 }), (*pSPentSpn2Cels)[PentSpn2Spin()]);
 	}
-	DrawString(out, str, { GetPanelPosition(UiPanels::Quest, { x, y }), { 257, 0 } }, disabled ? UiFlags::ColorWhitegold : UiFlags::ColorWhite);
+	DrawString(out, str, { GetPanelPosition(UiPanels::Quest, { x, y }), Size { 257, 0 } }, disabled ? UiFlags::ColorWhitegold : UiFlags::ColorWhite);
 	if (marked) {
 		ClxDraw(out, GetPanelPosition(UiPanels::Quest, { x + width + 7, y + 13 }), (*pSPentSpn2Cels)[PentSpn2Spin()]);
 	}

@@ -344,8 +344,8 @@ void InitGlobals()
 
 	dminPosition = WorldTilePosition(0, 0).megaToWorld();
 	dmaxPosition = WorldTilePosition(40, 40).megaToWorld();
-	SetPieceRoom = { { 0, 0 }, { 0, 0 } };
-	SetPiece = { { 0, 0 }, { 0, 0 } };
+	SetPieceRoom = { { 0, 0 }, WorldTileSize { 0, 0 } };
+	SetPiece = { { 0, 0 }, WorldTileSize { 0, 0 } };
 }
 
 } // namespace

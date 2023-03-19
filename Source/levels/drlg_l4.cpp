@@ -248,7 +248,7 @@ void GenerateRoom(WorldTileRectangle area, bool verticalLayout)
 
 void FirstRoom()
 {
-	WorldTileRectangle room { { 0, 0 }, { 14, 14 } };
+	WorldTileRectangle room { { 0, 0 }, WorldTileSize { 14, 14 } };
 	if (currlevel != 16) {
 		if (currlevel == Quests[Q_WARLORD]._qlevel && Quests[Q_WARLORD]._qactive != QUEST_NOTAVAIL) {
 			room.size = { 11, 11 };
@@ -1186,7 +1186,7 @@ void GenerateLevel(lvl_entry entry)
 		for (WorldTileCoord j = 1; j < DMAXY; j++) {
 			for (WorldTileCoord i = 1; i < DMAXX; i++) {
 				if (IsAnyOf(dungeon[i][j], 98, 107)) {
-					Make_SetPC({ WorldTilePosition(i - 1, j - 1), { 5, 5 } });
+					Make_SetPC({ WorldTilePosition(i - 1, j - 1), WorldTileSize { 5, 5 } });
 					// Set the portal position to the location of the northmost pentagram tile.
 					Quests[Q_BETRAYER].position = Point(i, j).megaToWorld();
 				}

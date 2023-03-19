@@ -110,7 +110,7 @@ bool TFit_Obj5(int t)
 	}
 
 	int candidatesFound = 0;
-	for (Point tile : PointsInRectangle(Rectangle { { 0, 0 }, { MAXDUNX, MAXDUNY } })) {
+	for (WorldTilePosition tile : PointsInRectangle(WorldTileRectangle { { 0, 0 }, WorldSize })) {
 		if (dTransVal[tile.x][tile.y] == themes[t].ttval && IsTileNotSolid(tile) && CheckThemeObj5(tile, themes[t].ttval)) {
 			// Use themex/y to keep track of the last candidate area found, in case we end up with fewer candidates than the target
 			themex = tile.x;

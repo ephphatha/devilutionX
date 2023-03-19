@@ -23,9 +23,14 @@ namespace devilution {
 
 #define DMAXX 40
 #define DMAXY 40
+constexpr WorldTileSize DungeonSize { 40, 40 };
 
 #define MAXDUNX (16 + DMAXX * 2 + 16)
 #define MAXDUNY (16 + DMAXY * 2 + 16)
+constexpr WorldTileSize WorldSize {
+	16 + DungeonSize.width * 2 + 16,
+	16 + DungeonSize.height * 2 + 16
+};
 
 #define MAXTHEMES 50
 #define MAXTILES 1379

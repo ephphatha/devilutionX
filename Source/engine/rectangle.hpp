@@ -33,6 +33,20 @@ struct RectangleOf {
 	}
 
 	/**
+	 * @brief Constructs a rectangle bounded by the given points.
+	 *
+	 * The resulting rectangle will have a position of the origin point and size such that it contains the extent.
+	 *
+	 * @param origin starting position of the target rectangle
+	 * @param extent the furthest corner of the bounding box defined by the resulting rectangle
+	 */
+	explicit constexpr RectangleOf(PointOf<CoordT> origin, PointOf<CoordT> extent)
+	    : position(origin)
+	    , size(extent.x - origin.x + 1, extent.y - origin.y + 1)
+	{
+	}
+
+	/**
 	 * @brief Whether this rectangle contains the given point.
 	 * Works correctly even if the point uses a different underlying numeric type
 	 */

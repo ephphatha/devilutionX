@@ -235,8 +235,9 @@ void DrawShadowString(const Surface &out, const PanelEntry &entry)
 		labelPosition += Displacement { -entry.labelLength - (IsSmallFontTall() ? 2 : 3), 0 };
 	}
 
-	DrawString(out, text, { labelPosition + Displacement { -2, 2 }, { entry.labelLength, PanelFieldHeight } }, style | UiFlags::ColorBlack, Spacing);
-	DrawString(out, text, { labelPosition, { entry.labelLength, PanelFieldHeight } }, style | UiFlags::ColorWhite, Spacing);
+	const Size textSize = { entry.labelLength, PanelFieldHeight };
+	DrawString(out, text, { labelPosition + Displacement { -2, 2 }, textSize }, style | UiFlags::ColorBlack, Spacing);
+	DrawString(out, text, { labelPosition, textSize }, style | UiFlags::ColorWhite, Spacing);
 }
 
 void DrawStatButtons(const Surface &out)
@@ -300,7 +301,7 @@ void DrawChr(const Surface &out)
 			DrawString(
 			    out,
 			    tmp.text,
-			    { entry.position + Displacement { pos.x, pos.y + PanelFieldPaddingTop }, { entry.length, PanelFieldInnerHeight } },
+			    { entry.position + Displacement { pos.x, pos.y + PanelFieldPaddingTop }, Size { entry.length, PanelFieldInnerHeight } },
 			    UiFlags::AlignCenter | UiFlags::VerticalCenter | tmp.style, tmp.spacing);
 		}
 	}
