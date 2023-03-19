@@ -277,6 +277,10 @@ TEST(RandomTest, NegativeReturnValues)
 	SetRndSeed(1457187811);
 	EXPECT_EQ(GenerateRnd(31), -1) << "Unexpected return value for a limit of 31";
 
+	// Frequently used to pick a random tile in a dungeon level (with the +16 offset to account for the fixed border this still ends up referencing a tile at -32)
+	SetRndSeed(1457187811);
+	EXPECT_EQ(GenerateRnd(80), -48) << "Unexpected return value for a limit of 80";
+
 	for (int i : { 9, 10, 12, 13, 14, 15, 18, 20, 21, 24, 26, 28, 30 }) {
 		SetRndSeed(1457187811);
 		EXPECT_EQ(GenerateRnd(i), -8) << "Unexpected return value for a limit of " << i;
