@@ -53,7 +53,7 @@ Item boyitem;
 namespace {
 
 /** The current towner being interacted with */
-_talker_id talker;
+TownerType talker;
 
 /** Is the current dialog full size */
 bool stextsize;
@@ -1258,10 +1258,10 @@ void StartTalk()
 
 	stextsize = false;
 	stextscrl = false;
-	AddSText(0, 2, fmt::format(fmt::runtime(_("Talk to {:s}")), _(TownerNames[talker])), UiFlags::ColorWhitegold | UiFlags::AlignCenter, false);
+	AddSText(0, 2, fmt::format(fmt::runtime(_("Talk to {:s}")), _(TownerNames[static_cast<size_t>(talker)])), UiFlags::ColorWhitegold | UiFlags::AlignCenter, false);
 	AddSLine(5);
 	if (gbIsSpawn) {
-		AddSText(0, 10, fmt::format(fmt::runtime(_("Talking to {:s}")), _(TownerNames[talker])), UiFlags::ColorWhite | UiFlags::AlignCenter, false);
+		AddSText(0, 10, fmt::format(fmt::runtime(_("Talking to {:s}")), _(TownerNames[static_cast<size_t>(talker)])), UiFlags::ColorWhite | UiFlags::AlignCenter, false);
 		AddSText(0, 12, _("is not available"), UiFlags::ColorWhite | UiFlags::AlignCenter, false);
 		AddSText(0, 14, _("in the shareware"), UiFlags::ColorWhite | UiFlags::AlignCenter, false);
 		AddSText(0, 16, _("version"), UiFlags::ColorWhite | UiFlags::AlignCenter, false);
@@ -1271,7 +1271,7 @@ void StartTalk()
 
 	int sn = 0;
 	for (auto &quest : Quests) {
-		if (quest._qactive == QUEST_ACTIVE && QuestDialogTable[talker][quest._qidx] != TEXT_NONE && quest._qlog)
+		if (quest._qactive == QUEST_ACTIVE && QuestDialogTable[static_cast<size_t>(talker)][quest._qidx] != TEXT_NONE && quest._qlog)
 			sn++;
 	}
 
@@ -1286,7 +1286,7 @@ void StartTalk()
 	int sn2 = sn - 2;
 
 	for (auto &quest : Quests) {
-		if (quest._qactive == QUEST_ACTIVE && QuestDialogTable[talker][quest._qidx] != TEXT_NONE && quest._qlog) {
+		if (quest._qactive == QUEST_ACTIVE && QuestDialogTable[static_cast<size_t>(talker)][quest._qidx] != TEXT_NONE && quest._qlog) {
 			AddSText(0, sn, _(QuestsData[quest._qidx]._qlstr), UiFlags::ColorWhite | UiFlags::AlignCenter, true);
 			sn += la;
 		}
@@ -1337,7 +1337,7 @@ void SmithEnter()
 {
 	switch (stextsel) {
 	case 10:
-		talker = TOWN_SMITH;
+		talker = TownerType::Smith;
 		stextlhold = 10;
 		stextshold = TalkID::Smith;
 		StartStore(TalkID::Gossip);
@@ -1589,7 +1589,7 @@ void WitchEnter()
 	switch (stextsel) {
 	case 12:
 		stextlhold = 12;
-		talker = TOWN_WITCH;
+		talker = TownerType::Witch;
 		stextshold = TalkID::Witch;
 		StartStore(TalkID::Gossip);
 		break;
@@ -1753,7 +1753,7 @@ void BoyEnter()
 		return;
 	}
 
-	talker = TOWN_PEGBOY;
+	talker = TownerType::PegBoy;
 	stextshold = TalkID::Boy;
 	stextlhold = stextsel;
 	StartStore(TalkID::Gossip);
@@ -1922,7 +1922,7 @@ void HealerEnter()
 	switch (stextsel) {
 	case 12:
 		stextlhold = 12;
-		talker = TOWN_HEALER;
+		talker = TownerType::Healer;
 		stextshold = TalkID::Healer;
 		StartStore(TalkID::Gossip);
 		break;
@@ -1968,7 +1968,7 @@ void StorytellerEnter()
 	switch (stextsel) {
 	case 12:
 		stextlhold = 12;
-		talker = TOWN_STORY;
+		talker = TownerType::StoryTeller;
 		stextshold = TalkID::Storyteller;
 		StartStore(TalkID::Gossip);
 		break;
@@ -2014,7 +2014,7 @@ void TalkEnter()
 
 	int sn = 0;
 	for (auto &quest : Quests) {
-		if (quest._qactive == QUEST_ACTIVE && QuestDialogTable[talker][quest._qidx] != TEXT_NONE && quest._qlog)
+		if (quest._qactive == QUEST_ACTIVE && QuestDialogTable[static_cast<size_t>(talker)][quest._qidx] != TEXT_NONE && quest._qlog)
 			sn++;
 	}
 	int la = 2;
@@ -2033,9 +2033,9 @@ void TalkEnter()
 	}
 
 	for (auto &quest : Quests) {
-		if (quest._qactive == QUEST_ACTIVE && QuestDialogTable[talker][quest._qidx] != TEXT_NONE && quest._qlog) {
+		if (quest._qactive == QUEST_ACTIVE && QuestDialogTable[static_cast<size_t>(talker)][quest._qidx] != TEXT_NONE && quest._qlog) {
 			if (sn == stextsel) {
-				InitQTextMsg(QuestDialogTable[talker][quest._qidx]);
+				InitQTextMsg(QuestDialogTable[static_cast<size_t>(talker)][quest._qidx]);
 			}
 			sn += la;
 		}
@@ -2047,7 +2047,7 @@ void TavernEnter()
 	switch (stextsel) {
 	case 12:
 		stextlhold = 12;
-		talker = TOWN_TAVERN;
+		talker = TownerType::Tavern;
 		stextshold = TalkID::Tavern;
 		StartStore(TalkID::Gossip);
 		break;
@@ -2062,7 +2062,7 @@ void BarmaidEnter()
 	switch (stextsel) {
 	case 12:
 		stextlhold = 12;
-		talker = TOWN_BMAID;
+		talker = TownerType::Barmaid;
 		stextshold = TalkID::Barmaid;
 		StartStore(TalkID::Gossip);
 		break;
@@ -2088,7 +2088,7 @@ void DrunkEnter()
 	switch (stextsel) {
 	case 12:
 		stextlhold = 12;
-		talker = TOWN_DRUNK;
+		talker = TownerType::Drunk;
 		stextshold = TalkID::Drunk;
 		StartStore(TalkID::Gossip);
 		break;

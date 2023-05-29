@@ -239,8 +239,8 @@ void StartPWaterPurify()
 
 void InitQuests()
 {
-	QuestDialogTable[TOWN_HEALER][Q_MUSHROOM] = TEXT_NONE;
-	QuestDialogTable[TOWN_WITCH][Q_MUSHROOM] = TEXT_MUSH9;
+	QuestDialogTable[static_cast<size_t>(TownerType::Healer)][Q_MUSHROOM] = TEXT_NONE;
+	QuestDialogTable[static_cast<size_t>(TownerType::Witch)][Q_MUSHROOM] = TEXT_MUSH9;
 
 	QuestLogIsOpen = false;
 	WaterDone = 0;
@@ -530,7 +530,7 @@ Point GetMapReturnPosition()
 	case SL_VILEBETRAYER:
 		return Quests[Q_BETRAYER].position + Direction::South;
 	default:
-		return GetTowner(TOWN_DRUNK)->position + Direction::SouthEast;
+		return GetTowner(TownerType::Drunk)->position + Direction::SouthEast;
 	}
 }
 
@@ -663,10 +663,10 @@ void ResyncQuests()
 		} else {
 			if (Quests[Q_MUSHROOM]._qactive == QUEST_ACTIVE) {
 				if (Quests[Q_MUSHROOM]._qvar1 >= QS_MUSHGIVEN) {
-					QuestDialogTable[TOWN_WITCH][Q_MUSHROOM] = TEXT_NONE;
-					QuestDialogTable[TOWN_HEALER][Q_MUSHROOM] = TEXT_MUSH3;
+					QuestDialogTable[static_cast<size_t>(TownerType::Witch)][Q_MUSHROOM] = TEXT_NONE;
+					QuestDialogTable[static_cast<size_t>(TownerType::Healer)][Q_MUSHROOM] = TEXT_MUSH3;
 				} else if (Quests[Q_MUSHROOM]._qvar1 >= QS_BRAINGIVEN) {
-					QuestDialogTable[TOWN_HEALER][Q_MUSHROOM] = TEXT_NONE;
+					QuestDialogTable[static_cast<size_t>(TownerType::Healer)][Q_MUSHROOM] = TEXT_NONE;
 				}
 			}
 		}

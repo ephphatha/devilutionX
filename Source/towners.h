@@ -12,27 +12,28 @@
 #include "items.h"
 #include "player.h"
 #include "quests.h"
+#include "utils/enum_traits.h"
 #include "utils/stdcompat/cstddef.hpp"
 
 namespace devilution {
 
 #define NUM_TOWNERS 16
 
-enum _talker_id : uint8_t {
-	TOWN_SMITH,
-	TOWN_HEALER,
-	TOWN_DEADGUY,
-	TOWN_TAVERN,
-	TOWN_STORY,
-	TOWN_DRUNK,
-	TOWN_WITCH,
-	TOWN_BMAID,
-	TOWN_PEGBOY,
-	TOWN_COW,
-	TOWN_FARMER,
-	TOWN_GIRL,
-	TOWN_COWFARM,
-	NUM_TOWNER_TYPES,
+enum class TownerType : uint8_t {
+	Smith,
+	Healer,
+	DeadGuy,
+	Tavern,
+	StoryTeller,
+	Drunk,
+	Witch,
+	Barmaid,
+	PegBoy,
+	Cow,
+	Farmer,
+	Girl,
+	CowFarmer,
+	LAST = CowFarmer,
 };
 
 struct Towner {
@@ -59,7 +60,7 @@ struct Towner {
 	uint8_t _tAnimFrame;
 	uint8_t _tAnimFrameCnt;
 	uint8_t animOrderSize;
-	_talker_id _ttype;
+	TownerType _ttype;
 
 	ClxSprite currentSprite() const
 	{
@@ -69,11 +70,11 @@ struct Towner {
 
 extern Towner Towners[NUM_TOWNERS];
 /**
- * @brief Maps from a _talker_id value to a pointer to the Towner object, if they have been initialised
+ * @brief Maps from a TownerType value to a pointer to the Towner object, if they have been initialised
  * @param type enum constant identifying the towner
  * @return Pointer to the Towner or nullptr if they are not available
  */
-Towner *GetTowner(_talker_id type);
+Towner *GetTowner(TownerType type);
 
 void InitTowners();
 void FreeTownerGFX();
@@ -86,6 +87,6 @@ void UpdateCowFarmerAnimAfterQuestComplete();
 #ifdef _DEBUG
 bool DebugTalkToTowner(std::string targetName);
 #endif
-extern _speech_id QuestDialogTable[NUM_TOWNER_TYPES][MAXQUESTS];
+extern _speech_id QuestDialogTable[enum_size<TownerType>::value][MAXQUESTS];
 
 } // namespace devilution

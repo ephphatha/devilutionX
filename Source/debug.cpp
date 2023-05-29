@@ -334,18 +334,18 @@ std::string ExportDun(const string_view parameter)
 	return StrCat(levelName, " saved. Happy mapping!");
 }
 
-std::unordered_map<string_view, _talker_id> TownerShortNameToTownerId = {
-	{ "griswold", _talker_id::TOWN_SMITH },
-	{ "pepin", _talker_id::TOWN_HEALER },
-	{ "ogden", _talker_id::TOWN_TAVERN },
-	{ "cain", _talker_id::TOWN_STORY },
-	{ "farnham", _talker_id::TOWN_DRUNK },
-	{ "adria", _talker_id::TOWN_WITCH },
-	{ "gillian", _talker_id::TOWN_BMAID },
-	{ "wirt", _talker_id ::TOWN_PEGBOY },
-	{ "lester", _talker_id ::TOWN_FARMER },
-	{ "girl", _talker_id ::TOWN_GIRL },
-	{ "nut", _talker_id::TOWN_COWFARM },
+std::unordered_map<string_view, TownerType> TownerShortNameToTownerId = {
+	{ "griswold", TownerType::Smith },
+	{ "pepin", TownerType::Healer },
+	{ "ogden", TownerType::Tavern },
+	{ "cain", TownerType::StoryTeller },
+	{ "farnham", TownerType::Drunk },
+	{ "adria", TownerType::Witch },
+	{ "gillian", TownerType::Barmaid },
+	{ "wirt", TownerType::PegBoy },
+	{ "lester", TownerType::Farmer },
+	{ "girl", TownerType::Girl },
+	{ "nut", TownerType::CowFarmer },
 };
 
 std::string DebugCmdVisitTowner(const string_view parameter)
