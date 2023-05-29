@@ -1271,7 +1271,7 @@ void StartTalk()
 
 	int sn = 0;
 	for (auto &quest : Quests) {
-		if (quest._qactive == QUEST_ACTIVE && QuestDialogTable[static_cast<size_t>(talker)][quest._qidx] != TEXT_NONE && quest._qlog)
+		if (quest._qactive == QUEST_ACTIVE && HasQuestDialog(talker, quest._qidx) && quest._qlog)
 			sn++;
 	}
 
@@ -1286,7 +1286,7 @@ void StartTalk()
 	int sn2 = sn - 2;
 
 	for (auto &quest : Quests) {
-		if (quest._qactive == QUEST_ACTIVE && QuestDialogTable[static_cast<size_t>(talker)][quest._qidx] != TEXT_NONE && quest._qlog) {
+		if (quest._qactive == QUEST_ACTIVE && HasQuestDialog(talker, quest._qidx) && quest._qlog) {
 			AddSText(0, sn, _(QuestsData[quest._qidx]._qlstr), UiFlags::ColorWhite | UiFlags::AlignCenter, true);
 			sn += la;
 		}
@@ -2014,7 +2014,7 @@ void TalkEnter()
 
 	int sn = 0;
 	for (auto &quest : Quests) {
-		if (quest._qactive == QUEST_ACTIVE && QuestDialogTable[static_cast<size_t>(talker)][quest._qidx] != TEXT_NONE && quest._qlog)
+		if (quest._qactive == QUEST_ACTIVE && HasQuestDialog(talker, quest._qidx) && quest._qlog)
 			sn++;
 	}
 	int la = 2;
@@ -2033,7 +2033,7 @@ void TalkEnter()
 	}
 
 	for (auto &quest : Quests) {
-		if (quest._qactive == QUEST_ACTIVE && QuestDialogTable[static_cast<size_t>(talker)][quest._qidx] != TEXT_NONE && quest._qlog) {
+		if (quest._qactive == QUEST_ACTIVE && HasQuestDialog(talker, quest._qidx) && quest._qlog) {
 			if (sn == stextsel) {
 				InitQTextMsg(QuestDialogTable[static_cast<size_t>(talker)][quest._qidx]);
 			}

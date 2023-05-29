@@ -87,6 +87,8 @@ void UpdateCowFarmerAnimAfterQuestComplete();
 #ifdef _DEBUG
 bool DebugTalkToTowner(std::string targetName);
 #endif
+
+bool HasQuestDialog(TownerType towner, quest_id quest);
 extern _speech_id QuestDialogTable[enum_size<TownerType>::value][MAXQUESTS];
 
 } // namespace devilution

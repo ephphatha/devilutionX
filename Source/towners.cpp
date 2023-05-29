@@ -959,4 +959,9 @@ bool DebugTalkToTowner(std::string targetName)
 }
 #endif
 
+bool HasQuestDialog(TownerType towner, quest_id quest)
+{
+	return QuestDialogTable[static_cast<size_t>(towner)][static_cast<size_t>(quest)] != TEXT_NONE;
+}
+
 } // namespace devilution
