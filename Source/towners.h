@@ -12,7 +12,6 @@
 #include "items.h"
 #include "player.h"
 #include "quests.h"
-#include "utils/enum_traits.h"
 #include "utils/stdcompat/cstddef.hpp"
 
 namespace devilution {
@@ -89,6 +88,7 @@ bool DebugTalkToTowner(std::string targetName);
 #endif
 
 bool HasQuestDialog(TownerType towner, quest_id quest);
-extern _speech_id QuestDialogTable[enum_size<TownerType>::value][MAXQUESTS];
+_speech_id GetQuestDialog(TownerType towner, quest_id quest);
+void SetQuestDialog(TownerType towner, quest_id quest, _speech_id speech);
 
 } // namespace devilution

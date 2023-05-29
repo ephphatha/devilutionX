@@ -239,8 +239,8 @@ void StartPWaterPurify()
 
 void InitQuests()
 {
-	QuestDialogTable[static_cast<size_t>(TownerType::Healer)][Q_MUSHROOM] = TEXT_NONE;
-	QuestDialogTable[static_cast<size_t>(TownerType::Witch)][Q_MUSHROOM] = TEXT_MUSH9;
+	SetQuestDialog(TownerType::Healer, Q_MUSHROOM, TEXT_NONE);
+	SetQuestDialog(TownerType::Witch, Q_MUSHROOM, TEXT_MUSH9);
 
 	QuestLogIsOpen = false;
 	WaterDone = 0;
@@ -663,10 +663,10 @@ void ResyncQuests()
 		} else {
 			if (Quests[Q_MUSHROOM]._qactive == QUEST_ACTIVE) {
 				if (Quests[Q_MUSHROOM]._qvar1 >= QS_MUSHGIVEN) {
-					QuestDialogTable[static_cast<size_t>(TownerType::Witch)][Q_MUSHROOM] = TEXT_NONE;
-					QuestDialogTable[static_cast<size_t>(TownerType::Healer)][Q_MUSHROOM] = TEXT_MUSH3;
+					SetQuestDialog(TownerType::Witch, Q_MUSHROOM, TEXT_NONE);
+					SetQuestDialog(TownerType::Healer, Q_MUSHROOM, TEXT_MUSH3);
 				} else if (Quests[Q_MUSHROOM]._qvar1 >= QS_BRAINGIVEN) {
-					QuestDialogTable[static_cast<size_t>(TownerType::Healer)][Q_MUSHROOM] = TEXT_NONE;
+					SetQuestDialog(TownerType::Healer, Q_MUSHROOM, TEXT_NONE);
 				}
 			}
 		}

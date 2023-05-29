@@ -10,6 +10,7 @@
 #include "inv.h"
 #include "minitext.h"
 #include "stores.h"
+#include "utils/enum_traits.h"
 #include "utils/language.h"
 
 namespace devilution {
@@ -438,8 +439,8 @@ void TalkToWitch(Player &player, Towner & /*witch*/)
 			if (Quests[Q_MUSHROOM]._qvar1 >= QS_TOMEGIVEN && Quests[Q_MUSHROOM]._qvar1 < QS_MUSHGIVEN) {
 				if (RemoveInventoryItemById(player, IDI_MUSHROOM)) {
 					Quests[Q_MUSHROOM]._qvar1 = QS_MUSHGIVEN;
-					QuestDialogTable[static_cast<size_t>(TownerType::Healer)][Q_MUSHROOM] = TEXT_MUSH3;
-					QuestDialogTable[static_cast<size_t>(TownerType::Witch)][Q_MUSHROOM] = TEXT_NONE;
+					SetQuestDialog(TownerType::Healer, Q_MUSHROOM, TEXT_MUSH3);
+					SetQuestDialog(TownerType::Witch, Q_MUSHROOM, TEXT_NONE);
 					Quests[Q_MUSHROOM]._qmsg = TEXT_MUSH10;
 					NetSendCmdQuest(true, Quests[Q_MUSHROOM]);
 					InitQTextMsg(TEXT_MUSH10);
@@ -522,7 +523,7 @@ void TalkToHealer(Player &player, Towner &healer)
 			SpawnQuestItem(IDI_SPECELIX, healer.position + Displacement { 0, 1 }, 0, 0, true);
 			InitQTextMsg(TEXT_MUSH4);
 			blackMushroom._qvar1 = QS_BRAINGIVEN;
-			QuestDialogTable[static_cast<size_t>(TownerType::Healer)][Q_MUSHROOM] = TEXT_NONE;
+			SetQuestDialog(TownerType::Healer, Q_MUSHROOM, TEXT_NONE);
 			NetSendCmdQuest(true, blackMushroom);
 			return;
 		}
@@ -961,7 +962,17 @@ bool DebugTalkToTowner(std::string targetName)
 
 bool HasQuestDialog(TownerType towner, quest_id quest)
 {
-	return QuestDialogTable[static_cast<size_t>(towner)][static_cast<size_t>(quest)] != TEXT_NONE;
+	return GetQuestDialog(towner, quest) != TEXT_NONE;
+}
+
+_speech_id GetQuestDialog(TownerType towner, quest_id quest)
+{
+	return QuestDialogTable[static_cast<size_t>(towner)][static_cast<size_t>(quest)];
+}
+
+void SetQuestDialog(TownerType towner, quest_id quest, _speech_id speech)
+{
+	QuestDialogTable[static_cast<size_t>(towner)][static_cast<size_t>(quest)] = speech;
 }
 
 } // namespace devilution

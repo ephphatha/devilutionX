@@ -2035,7 +2035,7 @@ void TalkEnter()
 	for (auto &quest : Quests) {
 		if (quest._qactive == QUEST_ACTIVE && HasQuestDialog(talker, quest._qidx) && quest._qlog) {
 			if (sn == stextsel) {
-				InitQTextMsg(QuestDialogTable[static_cast<size_t>(talker)][quest._qidx]);
+				InitQTextMsg(GetQuestDialog(talker, quest._qidx));
 			}
 			sn += la;
 		}
