@@ -15,8 +15,6 @@ namespace devilution {
 struct PlayerData {
 	/* Class Name */
 	const char *className;
-	/* Class Directory Path */
-	const char *classPath;
 	/* Class Starting Strength Stat */
 	uint8_t baseStr;
 	/* Class Starting Magic Stat */
@@ -56,6 +54,8 @@ struct PlayerData {
 };
 
 struct PlayerSpriteData {
+	/* Class Directory Path */
+	const char *classPath;
 	/* Sprite width: Stand */
 	uint8_t stand;
 	/* Sprite width: Walk */
