@@ -676,12 +676,13 @@ bool pfile_ui_set_hero_infos(bool (*uiAddHeroInfo)(_uiheroinfo *))
 	return true;
 }
 
-void pfile_ui_set_class_stats(unsigned int playerClass, _uidefaultstats *classStats)
+void pfile_ui_set_class_stats(HeroClass playerClass, _uidefaultstats *classStats)
 {
-	classStats->strength = PlayersData[playerClass].baseStr;
-	classStats->magic = PlayersData[playerClass].baseMag;
-	classStats->dexterity = PlayersData[playerClass].baseDex;
-	classStats->vitality = PlayersData[playerClass].baseVit;
+	const PlayerData &playerData = PlayersData[static_cast<size_t>(playerClass)];
+	classStats->strength = playerData.baseStr;
+	classStats->magic = playerData.baseMag;
+	classStats->dexterity = playerData.baseDex;
+	classStats->vitality = playerData.baseVit;
 }
 
 uint32_t pfile_ui_get_first_unused_save_num()
