@@ -678,7 +678,7 @@ bool pfile_ui_set_hero_infos(bool (*uiAddHeroInfo)(_uiheroinfo *))
 
 void pfile_ui_set_class_stats(HeroClass playerClass, _uidefaultstats *classStats)
 {
-	const PlayerData &playerData = PlayersData[static_cast<size_t>(playerClass)];
+	const PlayerData &playerData = GetPlayerDataForClass(playerClass);
 	classStats->strength = playerData.baseStr;
 	classStats->magic = playerData.baseMag;
 	classStats->dexterity = playerData.baseDex;
