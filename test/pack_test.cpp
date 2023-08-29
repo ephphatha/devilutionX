@@ -1084,8 +1084,10 @@ TEST_F(NetPackTest, UnPackNetPlayer_invalid_damageMod)
 
 TEST_F(NetPackTest, UnPackNetPlayer_invalid_baseToBlk)
 {
-	MyPlayer->_pBaseToBlk++;
-	ASSERT_FALSE(TestNetPackValidation());
+	PlayerNetPack packed;
+	PackNetPlayer(packed, *MyPlayer);
+	packed.pBaseToBlk++;
+	ASSERT_FALSE(UnPackNetPlayer(packed, Players[1]));
 }
 
 TEST_F(NetPackTest, UnPackNetPlayer_invalid_iMinDam)
