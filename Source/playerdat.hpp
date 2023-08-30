@@ -42,8 +42,6 @@ struct PlayerData {
 	uint8_t maxDex;
 	/* Class Maximum Vitality Stat */
 	uint8_t maxVit;
-	/* Class Block Bonus % */
-	uint8_t blockBonus;
 	/* Class Life Adjustment */
 	int16_t adjLife;
 	/* Class Mana Adjustment */
@@ -62,6 +60,17 @@ struct PlayerData {
 	int16_t itmMana;
 	/* Class Skill */
 	SpellID skill;
+};
+
+struct PlayerCombatData {
+	/* Class starting chance to Block (used as a %) */
+	uint8_t baseToBlock;
+	/* Class starting chance to hit when using melee attacks (used as a %) */
+	uint8_t baseMeleeToHit;
+	/* Class starting chance to hit when using ranged weapons (used as a %) */
+	uint8_t baseRangedToHit;
+	/* Class starting chance to hit when using spells (used as a %) */
+	uint8_t baseMagicToHit;
 };
 
 struct PlayerSpriteData {
@@ -155,6 +164,7 @@ extern const _sfx_id herosounds[enum_size<HeroClass>::value][enum_size<HeroSpeec
 uint32_t GetNextExperienceThresholdForLevel(unsigned level);
 uint8_t GetMaximumCharacterLevel();
 const PlayerData &GetPlayerDataForClass(HeroClass clazz);
+const PlayerCombatData &GetPlayerCombatDataForClass(HeroClass clazz);
 extern const PlayerSpriteData PlayersSpriteData[];
 extern const PlayerAnimData PlayersAnimData[];
 

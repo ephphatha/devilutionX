@@ -155,16 +155,28 @@ void ReloadExperienceData()
 /** Contains the data related to each player class. */
 const PlayerData PlayersData[] = {
 	// clang-format off
-// HeroClass                 className,       baseStr, baseMag,    baseDex,   baseVit,    maxStr, maxMag,     maxDex,    maxVit, blockBonus,   adjLife,                      adjMana,   lvlLife,   lvlMana,  chrLife,                     chrMana,                     itmLife,                      itmMana, skill,
+// HeroClass                 className,       baseStr, baseMag,    baseDex,   baseVit,    maxStr, maxMag,     maxDex,    maxVit,   adjLife,                      adjMana,   lvlLife,   lvlMana,  chrLife,                     chrMana,                     itmLife,                      itmMana, skill,
 
 // TRANSLATORS: Player Block start
-/* HeroClass::Warrior */   { N_("Warrior"),        30,      10,         20,        25,       250,     50,         60,       100,         30, (18 << 6),                    -(1 << 6),  (2 << 6),  (1 << 6), (2 << 6),                    (1 << 6),                    (2 << 6),                     (1 << 6), SpellID::ItemRepair    },
-/* HeroClass::Rogue */     { N_("Rogue"),          20,      15,         30,        20,        55,     70,        250,        80,         20, (23 << 6),  static_cast<int>(5.5F * 64),  (2 << 6),  (2 << 6), (1 << 6),                    (1 << 6), static_cast<int>(1.5F * 64),  static_cast<int>(1.5F * 64), SpellID::TrapDisarm    },
-/* HeroClass::Sorcerer */  { N_("Sorcerer"),       15,      35,         15,        20,        45,    250,         85,        80,         10,  (9 << 6),                    -(2 << 6),  (1 << 6),  (2 << 6), (1 << 6),                    (2 << 6),                    (1 << 6),                     (2 << 6), SpellID::StaffRecharge },
-/* HeroClass::Monk */      { N_("Monk"),           25,      15,         25,        20,       150,     80,        150,        80,         25, (23 << 6),  static_cast<int>(5.5F * 64),  (2 << 6),  (2 << 6), (1 << 6),                    (1 << 6), static_cast<int>(1.5F * 64),  static_cast<int>(1.5F * 64), SpellID::Search,       },
-/* HeroClass::Bard */      { N_("Bard"),           20,      20,         25,        20,       120,    120,        120,       100,         25, (23 << 6),                     (3 << 6),  (2 << 6),  (2 << 6), (1 << 6), static_cast<int>(1.5F * 64), static_cast<int>(1.5F * 64), static_cast<int>(1.75F * 64), SpellID::Identify      },
+/* HeroClass::Warrior */   { N_("Warrior"),        30,      10,         20,        25,       250,     50,         60,       100, (18 << 6),                    -(1 << 6),  (2 << 6),  (1 << 6), (2 << 6),                    (1 << 6),                    (2 << 6),                     (1 << 6), SpellID::ItemRepair    },
+/* HeroClass::Rogue */     { N_("Rogue"),          20,      15,         30,        20,        55,     70,        250,        80, (23 << 6),  static_cast<int>(5.5F * 64),  (2 << 6),  (2 << 6), (1 << 6),                    (1 << 6), static_cast<int>(1.5F * 64),  static_cast<int>(1.5F * 64), SpellID::TrapDisarm    },
+/* HeroClass::Sorcerer */  { N_("Sorcerer"),       15,      35,         15,        20,        45,    250,         85,        80,  (9 << 6),                    -(2 << 6),  (1 << 6),  (2 << 6), (1 << 6),                    (2 << 6),                    (1 << 6),                     (2 << 6), SpellID::StaffRecharge },
+/* HeroClass::Monk */      { N_("Monk"),           25,      15,         25,        20,       150,     80,        150,        80, (23 << 6),  static_cast<int>(5.5F * 64),  (2 << 6),  (2 << 6), (1 << 6),                    (1 << 6), static_cast<int>(1.5F * 64),  static_cast<int>(1.5F * 64), SpellID::Search,       },
+/* HeroClass::Bard */      { N_("Bard"),           20,      20,         25,        20,       120,    120,        120,       100, (23 << 6),                     (3 << 6),  (2 << 6),  (2 << 6), (1 << 6), static_cast<int>(1.5F * 64), static_cast<int>(1.5F * 64), static_cast<int>(1.75F * 64), SpellID::Identify      },
 // TRANSLATORS: Player Block end
-/* HeroClass::Barbarian */ { N_("Barbarian"),      40,       0,         20,        25,       255,      0,         55,       150,         30, (18 << 6),                     (0 << 6),  (2 << 6),  (0 << 6), (2 << 6),                    (1 << 6), static_cast<int>(2.5F * 64),                     (1 << 6), SpellID::Rage          },
+/* HeroClass::Barbarian */ { N_("Barbarian"),      40,       0,         20,        25,       255,      0,         55,       150, (18 << 6),                     (0 << 6),  (2 << 6),  (0 << 6), (2 << 6),                    (1 << 6), static_cast<int>(2.5F * 64),                     (1 << 6), SpellID::Rage          },
+	// clang-format on
+};
+
+const PlayerCombatData PlayersCombatData[] = {
+	// clang-format off
+// HeroClass                 baseToBlock, baseMeleeToHit, baseRangedToHit, baseMagicToHit,
+/* HeroClass::Warrior   */ {          30,             70,              60,             50, },
+/* HeroClass::Rogue     */ {          20,             50,              70,             50, },
+/* HeroClass::Sorcerer  */ {          10,             50,              50,             70, },
+/* HeroClass::Monk      */ {          25,             50,              50,             50, },
+/* HeroClass::Bard      */ {          25,             50,              60,             60, },
+/* HeroClass::Barbarian */ {          30,             50,              50,             50, }
 	// clang-format on
 };
 
@@ -199,6 +211,11 @@ const _sfx_id herosounds[enum_size<HeroClass>::value][enum_size<HeroSpeech>::val
 const PlayerData &GetPlayerDataForClass(HeroClass clazz)
 {
 	return PlayersData[static_cast<size_t>(clazz)];
+}
+
+const PlayerCombatData &GetPlayerCombatDataForClass(HeroClass clazz)
+{
+	return PlayersCombatData[static_cast<size_t>(clazz)];
 }
 
 /** Contains the data related to each player class. */

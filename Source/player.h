@@ -36,7 +36,6 @@ constexpr uint8_t MaxSpellLevel = 15;
 constexpr int PlayerNameLength = 32;
 
 constexpr size_t NumHotkeys = 12;
-constexpr int BaseHitChance = 50;
 
 /** Walking directions */
 enum {
@@ -374,6 +373,11 @@ public:
 		return GetPlayerDataForClass(_pClass);
 	}
 
+	[[nodiscard]] const PlayerCombatData &getPlayerCombatData() const
+	{
+		return GetPlayerCombatDataForClass(_pClass);
+	}
+
 	/**
 	 * @brief Gets the translated name for the character's class
 	 */
@@ -384,7 +388,7 @@ public:
 
 	[[nodiscard]] int getBaseToBlock() const
 	{
-		return getPlayerData().blockBonus;
+		return getPlayerCombatData().baseToBlock;
 	}
 
 	void CalcScrolls();
@@ -566,10 +570,7 @@ public:
 	 */
 	int GetMeleeToHit() const
 	{
-		int hper = getCharacterLevel() + _pDexterity / 2 + _pIBonusToHit + BaseHitChance;
-		if (_pClass == HeroClass::Warrior)
-			hper += 20;
-		return hper;
+		return getCharacterLevel() + _pDexterity / 2 + _pIBonusToHit + getPlayerCombatData().baseMeleeToHit;
 	}
 
 	/**
@@ -589,12 +590,7 @@ public:
 	 */
 	int GetRangedToHit() const
 	{
-		int hper = getCharacterLevel() + _pDexterity + _pIBonusToHit + BaseHitChance;
-		if (_pClass == HeroClass::Rogue)
-			hper += 20;
-		else if (_pClass == HeroClass::Warrior || _pClass == HeroClass::Bard)
-			hper += 10;
-		return hper;
+		return getCharacterLevel() + _pDexterity + _pIBonusToHit + getPlayerCombatData().baseRangedToHit;
 	}
 
 	int GetRangedPiercingToHit() const
@@ -611,12 +607,7 @@ public:
 	 */
 	int GetMagicToHit() const
 	{
-		int hper = _pMagic + BaseHitChance;
-		if (_pClass == HeroClass::Sorcerer)
-			hper += 20;
-		else if (_pClass == HeroClass::Bard)
-			hper += 10;
-		return hper;
+		return _pMagic + getPlayerCombatData().baseMagicToHit;
 	}
 
 	/**
