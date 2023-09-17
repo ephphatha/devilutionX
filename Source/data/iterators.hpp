@@ -6,6 +6,7 @@
 #include <expected.hpp>
 
 #include "parser.hpp"
+#include "utils/parse_int.hpp"
 
 namespace devilution {
 
@@ -30,6 +31,18 @@ public:
 		case std::errc::result_out_of_range:
 			return tl::unexpected { Error::OutOfRange };
 		case std::errc::invalid_argument:
+			return tl::unexpected { Error::NotANumber };
+		default:
+			return tl::unexpected { Error::InvalidValue };
+		}
+	}
+
+	static tl::expected<void, Error> mapError(ParseIntError ec)
+	{
+		switch (ec) {
+		case ParseIntError::OutOfRange:
+			return tl::unexpected { Error::OutOfRange };
+		case ParseIntError::ParseError:
 			return tl::unexpected { Error::NotANumber };
 		default:
 			return tl::unexpected { Error::InvalidValue };
@@ -103,6 +116,69 @@ public:
 	{
 		T value = 0;
 		return parseInt(value).map([value]() { return value; });
+	}
+
+	/**
+	 * @brief Attempts to parse the current field as a fixed point value with 6 bits for the fraction
+	 *
+	 * You can freely interleave this method with calls to operator*. If this is the first value
+	 * access since the last advance this will scan the current field and store it for later
+	 * use with operator* or repeated calls to parseInt/Fixed6 (even with different types).
+	 * @tparam T an Integral type supported by std::from_chars
+	 * @param destination value to store the result of successful parsing
+	 * @return an error code equivalent to what you'd get from from_chars if parsing failed
+	 */
+	template <typename T>
+	[[nodiscard]] tl::expected<void, Error> parseFixed6(T &destination)
+	{
+		constexpr T minIntegerValue = std::numeric_limits<T>::min() >> 6;
+		constexpr T maxIntegerValue = std::numeric_limits<T>::max() >> 6;
+
+		const char *begin = state_->status == GetFieldResult::Status::ReadyToRead ? state_->next : state_->value.data();
+		const char *currentChar; // will be set by the call to parseInt
+		ParseIntResult<T> integerParseResult = ParseInt({ begin, end_ }, minIntegerValue, maxIntegerValue, &currentChar);
+
+		if (integerParseResult.has_value()) {
+			uint8_t fractionPart = 0;
+			T integerPart = integerParseResult.value();
+
+			if (currentChar != end_ && *(currentChar) == '.') {
+				// got a fractional part to read too
+				++currentChar;
+
+				fractionPart = ParseFixed6Fraction({ currentChar, end_ }, &currentChar);
+			}
+
+			// rounding could give us a value of 64 for the fraction part (e.g. 0.993 rounds to 1.0) so we need to ensure this doesn't overflow
+			if (fractionPart >= 64 && (integerPart >= maxIntegerValue || (std::is_signed_v<T> && integerPart <= minIntegerValue))) {
+				integerParseResult = tl::unexpected { ParseIntError::OutOfRange };
+			} else {
+				destination = integerPart << 6;
+				if (destination < 0) {
+					destination -= fractionPart;
+				} else {
+					destination += fractionPart;
+				}
+			}
+		}
+		if (state_->status == GetFieldResult::Status::ReadyToRead) {
+			*state_ = GetNextField(currentChar, end_);
+			// and prepend what was already parsed
+			state_->value = { begin, (state_->value.data() - begin) + state_->value.size() };
+		}
+
+		if (integerParseResult.has_value()) {
+			return {};
+		} else {
+			return mapError(integerParseResult.error());
+		}
+	}
+
+	template <typename T>
+	[[nodiscard]] tl::expected<T, Error> asFixed6()
+	{
+		T value = 0;
+		return parseFixed6(value).map([value]() { return value; });
 	}
 
 	/**
