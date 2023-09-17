@@ -153,20 +153,274 @@ void ReloadExperienceData()
 }
 
 /** Contains the data related to each player class. */
-const PlayerData PlayersData[] = {
-	// clang-format off
-// HeroClass                 className,       baseStr, baseMag,    baseDex,   baseVit,    maxStr, maxMag,     maxDex,    maxVit,   adjLife,                      adjMana,   lvlLife,   lvlMana,  chrLife,                     chrMana,                     itmLife,                      itmMana,
+std::array<PlayerData, enum_size<HeroClass>::value> PlayersData;
 
-// TRANSLATORS: Player Block start
-/* HeroClass::Warrior */   { N_("Warrior"),        30,      10,         20,        25,       250,     50,         60,       100, (18 << 6),                    -(1 << 6),  (2 << 6),  (1 << 6), (2 << 6),                    (1 << 6),                    (2 << 6),                     (1 << 6), },
-/* HeroClass::Rogue */     { N_("Rogue"),          20,      15,         30,        20,        55,     70,        250,        80, (23 << 6),  static_cast<int>(5.5F * 64),  (2 << 6),  (2 << 6), (1 << 6),                    (1 << 6), static_cast<int>(1.5F * 64),  static_cast<int>(1.5F * 64), },
-/* HeroClass::Sorcerer */  { N_("Sorcerer"),       15,      35,         15,        20,        45,    250,         85,        80,  (9 << 6),                    -(2 << 6),  (1 << 6),  (2 << 6), (1 << 6),                    (2 << 6),                    (1 << 6),                     (2 << 6), },
-/* HeroClass::Monk */      { N_("Monk"),           25,      15,         25,        20,       150,     80,        150,        80, (23 << 6),  static_cast<int>(5.5F * 64),  (2 << 6),  (2 << 6), (1 << 6),                    (1 << 6), static_cast<int>(1.5F * 64),  static_cast<int>(1.5F * 64), },
-/* HeroClass::Bard */      { N_("Bard"),           20,      20,         25,        20,       120,    120,        120,       100, (23 << 6),                     (3 << 6),  (2 << 6),  (2 << 6), (1 << 6), static_cast<int>(1.5F * 64), static_cast<int>(1.5F * 64), static_cast<int>(1.75F * 64), },
-// TRANSLATORS: Player Block end
-/* HeroClass::Barbarian */ { N_("Barbarian"),      40,       0,         20,        25,       255,      0,         55,       150, (18 << 6),                     (0 << 6),  (2 << 6),  (0 << 6), (2 << 6),                    (1 << 6), static_cast<int>(2.5F * 64),                     (1 << 6), },
-	// clang-format on
+enum class PlayerDataColumn {
+	Class,
+	BaseStrength,
+	BaseMagic,
+	BaseDexterity,
+	BaseVitality,
+	MaximumStrength,
+	MaximumMagic,
+	MaximumDexterity,
+	MaximumVitality,
+	LifeAdjustment,
+	ManaAdjustment,
+	LifePerLevel,
+	ManaPerLevel,
+	LifePerStat,
+	ManaPerStat,
+	LifeItemBonus,
+	ManaItemBonus,
+	LAST = ManaItemBonus
 };
+
+tl::expected<PlayerDataColumn, ColumnDefinition::Error> mapPlayerDataColumnFromName(std::string_view name)
+{
+	if (name == "Class") {
+		return PlayerDataColumn::Class;
+	}
+	if (name == "Base Strength") {
+		return PlayerDataColumn::BaseStrength;
+	}
+	if (name == "Base Magic") {
+		return PlayerDataColumn::BaseMagic;
+	}
+	if (name == "Base Dexterity") {
+		return PlayerDataColumn::BaseDexterity;
+	}
+	if (name == "Base Vitality") {
+		return PlayerDataColumn::BaseVitality;
+	}
+	if (name == "Maximum Strength") {
+		return PlayerDataColumn::MaximumStrength;
+	}
+	if (name == "Maximum Magic") {
+		return PlayerDataColumn::MaximumMagic;
+	}
+	if (name == "Maximum Dexterity") {
+		return PlayerDataColumn::MaximumDexterity;
+	}
+	if (name == "Maximum Vitality") {
+		return PlayerDataColumn::MaximumVitality;
+	}
+	if (name == "Base Life") {
+		return PlayerDataColumn::LifeAdjustment;
+	}
+	if (name == "Base Mana") {
+		return PlayerDataColumn::ManaAdjustment;
+	}
+	if (name == "Life Per Level") {
+		return PlayerDataColumn::LifePerLevel;
+	}
+	if (name == "Mana Per Level") {
+		return PlayerDataColumn::ManaPerLevel;
+	}
+	if (name == "Life Per Player Stat") {
+		return PlayerDataColumn::LifePerStat;
+	}
+	if (name == "Mana Per Player Stat") {
+		return PlayerDataColumn::ManaPerStat;
+	}
+	if (name == "Life Per Item Stat") {
+		return PlayerDataColumn::LifeItemBonus;
+	}
+	if (name == "Mana Per Item Stat") {
+		return PlayerDataColumn::ManaItemBonus;
+	}
+	return tl::unexpected { ColumnDefinition::Error::UnknownColumn };
+}
+
+void ReloadPlayerData()
+{
+	constexpr std::string_view filename = "txtdata\\CharStats.tsv";
+	auto dataFileResult = DataFile::load(filename);
+	if (!dataFileResult.has_value()) {
+		DataFile::reportFatalError(dataFileResult.error(), filename);
+	}
+	DataFile &dataFile = dataFileResult.value();
+
+	constexpr unsigned ExpectedColumnCount = enum_size<PlayerDataColumn>::value;
+
+	std::array<ColumnDefinition, ExpectedColumnCount> columns;
+	auto parseHeaderResult = dataFile.parseHeader<PlayerDataColumn>(columns.data(), columns.data() + columns.size(), mapPlayerDataColumnFromName);
+
+	if (!parseHeaderResult.has_value()) {
+		DataFile::reportFatalError(parseHeaderResult.error(), filename);
+	}
+
+	for (DataFileRecord record : dataFile) {
+		HeroClass clazz = static_cast<HeroClass>(-1);
+		PlayerData characterStats {};
+		bool skipRecord = false;
+
+		FieldIterator fieldIt = record.begin();
+		FieldIterator endField = record.end();
+		for (auto &column : columns) {
+			fieldIt += column.skipLength;
+
+			if (fieldIt == endField) {
+				DataFile::reportFatalError(DataFile::Error::NotEnoughColumns, filename);
+			}
+
+			DataFileField field = *fieldIt;
+
+			switch (static_cast<PlayerDataColumn>(column)) {
+			case PlayerDataColumn::Class: {
+				/* TRANSLATORS: Player Class names */
+				if (*field == "Warrior") {
+					clazz = HeroClass::Warrior;
+					characterStats.className = N_("Warrior");
+				} else if (*field == "Rogue") {
+					clazz = HeroClass::Rogue;
+					characterStats.className = N_("Rogue");
+				} else if (*field == "Sorcerer") {
+					clazz = HeroClass::Sorcerer;
+					characterStats.className = N_("Sorcerer");
+				} else if (*field == "Monk") {
+					clazz = HeroClass::Monk;
+					characterStats.className = N_("Monk");
+				} else if (*field == "Bard") {
+					clazz = HeroClass::Bard;
+					characterStats.className = N_("Bard");
+				} else if (*field == "Barbarian") {
+					clazz = HeroClass::Barbarian;
+					characterStats.className = N_("Barbarian");
+				} else if (*field == "Expansion") {
+					// Special marker line used in Diablo 2 text files to separate base game classes from expansion classes.
+					skipRecord = true;
+				} else {
+					DataFile::reportFatalFieldError(DataFileField::Error::InvalidValue, filename, "Class", field);
+				}
+			} break;
+
+			case PlayerDataColumn::BaseStrength: {
+				auto parseIntResult = field.parseInt(characterStats.baseStr);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Base Strength", field);
+				}
+			} break;
+
+			case PlayerDataColumn::BaseMagic: {
+				auto parseIntResult = field.parseInt(characterStats.baseMag);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Base Magic", field);
+				}
+			} break;
+
+			case PlayerDataColumn::BaseDexterity: {
+				auto parseIntResult = field.parseInt(characterStats.baseDex);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Base Dexterity", field);
+				}
+			} break;
+
+			case PlayerDataColumn::BaseVitality: {
+				auto parseIntResult = field.parseInt(characterStats.baseVit);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Base Vitality", field);
+				}
+			} break;
+
+			case PlayerDataColumn::MaximumStrength: {
+				auto parseIntResult = field.parseInt(characterStats.maxStr);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Maximum Strength", field);
+				}
+			} break;
+
+			case PlayerDataColumn::MaximumMagic: {
+				auto parseIntResult = field.parseInt(characterStats.maxMag);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Maximum Magic", field);
+				}
+			} break;
+
+			case PlayerDataColumn::MaximumDexterity: {
+				auto parseIntResult = field.parseInt(characterStats.maxDex);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Maximum Dexterity", field);
+				}
+			} break;
+
+			case PlayerDataColumn::MaximumVitality: {
+				auto parseIntResult = field.parseInt(characterStats.maxVit);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Maximum Vitality", field);
+				}
+			} break;
+
+			case PlayerDataColumn::LifeAdjustment: {
+				auto parseIntResult = field.parseFixed6(characterStats.adjLife);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Base Life", field);
+				}
+			} break;
+
+			case PlayerDataColumn::ManaAdjustment: {
+				auto parseIntResult = field.parseFixed6(characterStats.adjMana);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Base Mana", field);
+				}
+			} break;
+
+			case PlayerDataColumn::LifePerLevel: {
+				auto parseIntResult = field.parseFixed6(characterStats.lvlLife);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Life Per Level", field);
+				}
+			} break;
+
+			case PlayerDataColumn::ManaPerLevel: {
+				auto parseIntResult = field.parseFixed6(characterStats.lvlMana);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Mana Per Level", field);
+				}
+			} break;
+
+			case PlayerDataColumn::LifePerStat: {
+				auto parseIntResult = field.parseFixed6(characterStats.chrLife);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Life Per Player Stat", field);
+				}
+			} break;
+
+			case PlayerDataColumn::ManaPerStat: {
+				auto parseIntResult = field.parseFixed6(characterStats.chrMana);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Mana Per Player Stat", field);
+				}
+			} break;
+
+			case PlayerDataColumn::LifeItemBonus: {
+				auto parseIntResult = field.parseFixed6(characterStats.itmLife);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Life Per Item Stat", field);
+				}
+			} break;
+
+			case PlayerDataColumn::ManaItemBonus: {
+				auto parseIntResult = field.parseFixed6(characterStats.itmMana);
+				if (!parseIntResult.has_value()) {
+					DataFile::reportFatalFieldError(parseIntResult.error(), filename, "Mana Per Item Stat", field);
+				}
+			} break;
+
+			default:
+				break;
+			}
+
+			if (skipRecord)
+				break;
+
+			++fieldIt;
+		}
+
+		if (!skipRecord)
+			PlayersData[static_cast<size_t>(clazz)] = characterStats;
+	}
+}
 
 const PlayerCombatData PlayersCombatData[] = {
 	// clang-format off
@@ -197,6 +451,7 @@ const std::array<PlayerStartingLoadoutData, enum_size<HeroClass>::value> Players
 void LoadPlayerDataFiles()
 {
 	ReloadExperienceData();
+	ReloadPlayerData();
 }
 
 uint32_t GetNextExperienceThresholdForLevel(unsigned level)

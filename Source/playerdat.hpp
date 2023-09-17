@@ -184,7 +184,7 @@ struct PlayerAnimData {
 };
 
 /**
- * @brief Attempts to load data values from external files, currently only Experience.tsv is supported.
+ * @brief Attempts to load data values from external files (Experience.tsv, CharStats.tsv)
  */
 void LoadPlayerDataFiles();
 

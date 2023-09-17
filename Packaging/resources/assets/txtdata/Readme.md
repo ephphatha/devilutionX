@@ -93,6 +93,40 @@ format again, refer to the help files provided alongside the game data
 (`Data/Global/Excel`) (also available online at
 [D2:R Modding][d2rmodding-utilities]).
 
+### CharStats.tsv
+This file contains the starting attributes, natural attribute caps, and
+starting life/mana as well as the gain from items/stats.
+
+#### Class
+The class identifier (US English name for the class, so one of "Warrior",
+"Rogue", "Sorcerer", etc...). This will be translated into the active language
+at runtime.
+
+#### Base Strength, Base Magic, Base Dexterity, Base Vitality
+The starting attribute values for a new character
+
+#### Maximum Strength, Maximum Magic, Maximum Dexterity, Maximum Vitality
+The highest natural value players can obtain by spending the points gained on
+level up. This is a soft cap, item bonuses could push the effective attribute
+value higher than this.
+
+#### Base Life, Base Mana
+The starting life/mana of a new character. A negative mana value can be used to
+restrict spell availability for certain classes, but negative life values will
+make a class unplayable.
+
+#### Life Per Level, Mana Per Level
+How much life/mana a character gains each time they level up.
+
+#### Life Per Player Stat, Mana Per Player Stat
+How much life a character gains for each point of Vitality they have naturally,
+or how much mana a character gains for each point of Magic they have naturally.
+
+#### Life Per Item Stat, Mana Per Item Stat
+How much life a character gains for each point of Vitality they get through
+item bonuses, or how much mana a character gains for each point of Magic they
+get through item bonuses.
+
 ### Experience.tsv
 Experience contains the experience value thresholds before a character
 advances to the next level. All numeric values in this file MUST be written in
