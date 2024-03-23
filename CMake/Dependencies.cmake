@@ -241,6 +241,8 @@ if(DISCORD_INTEGRATION)
   add_subdirectory(3rdParty/discord)
 endif()
 
+add_subdirectory(3rdParty/fpm)
+
 if(BUILD_TESTING)
   dependency_options("googletest" DEVILUTIONX_SYSTEM_GOOGLETEST ON DEVILUTIONX_STATIC_GOOGLETEST)
   if(DEVILUTIONX_SYSTEM_GOOGLETEST)

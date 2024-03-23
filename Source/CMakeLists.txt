@@ -325,6 +325,7 @@ target_link_libraries(libdevilutionx PUBLIC
   simpleini::simpleini
   tl
   hoehrmann_utf8
+  fpm
   ${libdevilutionx_DEPS}
 )
 
