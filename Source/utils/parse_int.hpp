@@ -7,6 +7,8 @@
 
 #include <expected.hpp>
 
+#include "engine/fixed.hpp"
+
 namespace devilution {
 
 enum class ParseIntError {
@@ -45,7 +47,7 @@ ParseIntResult<IntT> ParseInt(
 uint8_t ParseFixed6Fraction(std::string_view str, const char **endOfParse = nullptr);
 
 template <typename IntT>
-ParseIntResult<IntT> ParseFixed6(std::string_view str, const char **endOfParse = nullptr)
+ParseIntResult<IntT> ParseFixed6Raw(std::string_view str, const char **endOfParse = nullptr)
 {
 	if (endOfParse != nullptr) {
 		// To allow for early returns we set the end pointer to the start of the string, which is the common case for errors.
@@ -59,7 +61,7 @@ ParseIntResult<IntT> ParseFixed6(std::string_view str, const char **endOfParse =
 	constexpr IntT minIntegerValue = std::numeric_limits<IntT>::min() >> 6;
 	constexpr IntT maxIntegerValue = std::numeric_limits<IntT>::max() >> 6;
 
-	const char *currentChar; // will be set by the call to parseInt
+	const char *currentChar {}; // will be set by the call to parseInt
 	ParseIntResult<IntT> integerParseResult = ParseInt(str, minIntegerValue, maxIntegerValue, &currentChar);
 
 	bool isNegative = std::is_signed_v<IntT> && str[0] == '-';
@@ -110,6 +112,10 @@ ParseIntResult<IntT> ParseFixed6(std::string_view str, const char **endOfParse =
 		}
 		return fixedValue;
 	}
+}
+
+constexpr ParseIntResult<Fixed6> ParseFixed6(std::string_view str, const char **endOfParse = nullptr) {
+	return ParseFixed6Raw<int32_t>(str, endOfParse).map(Fixed6::from_raw_value);
 }
 
 } // namespace devilution

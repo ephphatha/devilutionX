@@ -237,13 +237,13 @@ public:
 		if (state_->status == GetFieldResult::Status::ReadyToRead) {
 			const char *begin = state_->next;
 			// first read, consume digits
-			parseResult = ParseFixed6<T>({ begin, static_cast<size_t>(end_ - begin) }, &state_->next);
+			parseResult = ParseFixed6Raw<T>({ begin, static_cast<size_t>(end_ - begin) }, &state_->next);
 			// then read the remainder of the field
 			*state_ = GetNextField(state_->next, end_);
 			// and prepend what was already parsed
 			state_->value = { begin, (state_->value.data() - begin) + state_->value.size() };
 		} else {
-			parseResult = ParseFixed6<T>(state_->value);
+			parseResult = ParseFixed6Raw<T>(state_->value);
 		}
 
 		if (parseResult.has_value()) {
